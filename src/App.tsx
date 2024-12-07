@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import logo from "./logo.svg";
 import "./App.css";
 import { klines, price } from "lib/api/market/bianaceAPI";
+import { timeStamp } from "console";
+import { smaIndicator } from "lib/indicator/movingAverage";
 
 const fetchTickerPrice = async () => {
   try {
@@ -17,26 +19,33 @@ const fetchTickerPrice = async () => {
   }
 };
 
-const fetchMarketData = async (
-  symbol: string,
-  interval: string,
-  limit: number
-) => {
-  try {
-    const response = await klines(symbol, interval, limit);
-
-    if (response && response.data) {
-      console.log(response.data);
-    }
-  } catch (e) {
-    console.log(e);
-    throw e;
-  }
-};
-
 function App() {
-  fetchTickerPrice();
-  fetchMarketData("BTCUSDT", "1h", 1000);
+  const [marketData, setMarketData] = useState([]);
+
+  const fetchMarketData = async (
+    symbol: string,
+    interval: string,
+    limit: number
+  ) => {
+    try {
+      const response = await klines(symbol, interval, limit);
+
+      if (response && response.data) {
+        setMarketData(response.data);
+      }
+    } catch (e) {
+      console.log(e);
+      throw e;
+    }
+  };
+
+  useEffect(() => {
+    fetchMarketData("BTCUSDT", "1d", 1000);
+  }, []);
+
+  useEffect(() => {
+    smaIndicator(marketData, 89);
+  }, [marketData]);
 
   return (
     <div className="App">
