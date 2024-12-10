@@ -4,7 +4,7 @@ import logo from "./logo.svg";
 import "./App.css";
 import { klines, price } from "lib/api/market/bianaceAPI";
 import { timeStamp } from "console";
-import { smaIndicator } from "lib/indicator/movingAverage";
+import { emaIndicator, smaIndicator } from "lib/indicator/movingAverage";
 
 const fetchTickerPrice = async () => {
   try {
@@ -31,6 +31,7 @@ function App() {
       const response = await klines(symbol, interval, limit);
 
       if (response && response.data) {
+        console.log(response?.data);
         setMarketData(response.data);
       }
     } catch (e) {
@@ -44,7 +45,12 @@ function App() {
   }, []);
 
   useEffect(() => {
-    smaIndicator(marketData, 89);
+    if (marketData.length !== 0) {
+      const tSma = smaIndicator(marketData, 89);
+      const tEma = emaIndicator(marketData, 89, tSma);
+
+      console.log("SMA ", tSma, "ema ", tEma);
+    }
   }, [marketData]);
 
   return (
