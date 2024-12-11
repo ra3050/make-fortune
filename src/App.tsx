@@ -3,8 +3,7 @@ import React, { useEffect, useState } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import { klines, price } from "lib/api/market/bianaceAPI";
-import { timeStamp } from "console";
-import { emaIndicator, smaIndicator } from "lib/indicator/movingAverage";
+import { ema, sma } from "lib/indicator/movingAverage";
 
 const fetchTickerPrice = async () => {
   try {
@@ -21,6 +20,10 @@ const fetchTickerPrice = async () => {
 
 function App() {
   const [marketData, setMarketData] = useState([]);
+  const [smaArray, setSmaArray] = useState([]);
+  const [emaArray, setEmaArray] = useState([]);
+
+  const calcSimpleMovingAverage = (movingLength: number): void => {};
 
   const fetchMarketData = async (
     symbol: string,
@@ -46,10 +49,8 @@ function App() {
 
   useEffect(() => {
     if (marketData.length !== 0) {
-      const tSma = smaIndicator(marketData, 89);
-      const tEma = emaIndicator(marketData, 89, tSma);
-
-      console.log("SMA ", tSma, "ema ", tEma);
+      sma(marketData, 89);
+      ema(marketData, 89);
     }
   }, [marketData]);
 
