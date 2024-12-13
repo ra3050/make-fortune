@@ -4,6 +4,8 @@ import logo from "./logo.svg";
 import "./App.css";
 import { klines, price } from "lib/api/market/bianaceAPI";
 import { ema, sma } from "lib/indicator/movingAverage";
+import { heikinashi } from "lib/chart/heikinashi";
+import { rsi } from "lib/indicator/RelativeStrengthIndex";
 
 const fetchTickerPrice = async () => {
   try {
@@ -23,8 +25,6 @@ function App() {
   const [smaArray, setSmaArray] = useState([]);
   const [emaArray, setEmaArray] = useState([]);
 
-  const calcSimpleMovingAverage = (movingLength: number): void => {};
-
   const fetchMarketData = async (
     symbol: string,
     interval: string,
@@ -34,7 +34,7 @@ function App() {
       const response = await klines(symbol, interval, limit);
 
       if (response && response.data) {
-        console.log(response?.data);
+        // console.log(response?.data);
         setMarketData(response.data);
       }
     } catch (e) {
@@ -51,6 +51,10 @@ function App() {
     if (marketData.length !== 0) {
       sma(marketData, 89);
       ema(marketData, 89);
+      const heikin = heikinashi(marketData);
+      // tradingView의 rsi와 차이를 보임
+      // tradingview의 rsi도 만들어서 테스트 해봐야 할 것으로 보임
+      rsi(heikin, 14, 1);
     }
   }, [marketData]);
 

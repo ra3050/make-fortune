@@ -27,14 +27,13 @@ export const sma = (
     sma.push(value / length);
   }
 
-  console.log("calc sam for :: \n", sma);
+  // console.log("calc sam for :: \n", sma);
 
   return sma;
 };
 
 /**
  * 단일 타임스템프에 대한 ema값을 반환합니다.
-
  * @param mData marketData :: 시장데이터 배열
  * @param length MA길이
  * @param timeStamp 데이터 타임스템프
@@ -53,18 +52,18 @@ export const ema = (
   const mLength = mData.length ?? 0;
 
   let ema = [];
+  let value: number = 0;
   for (let i = length; i < mLength; i++) {
-    let value = 0;
     if (i !== length) {
-      value = parseInt(mData[i][4]) * exponent + value * (1 - exponent); // (금일종가 * 승수) + (전일 EMA * (1 - 승수))
+      value = parseFloat(mData[i][4]) * exponent + value * (1 - exponent); // (금일종가 * 승수) + (전일 EMA * (1 - 승수))
     } else {
       // ema가 시작되는 부분
-      value = parseInt(mData[i][4]);
+      value = parseFloat(mData[i][4]);
     }
     ema.push(value);
   }
 
-  console.log("calc ema for :: \n", ema);
+  // console.log("calc ema for :: \n", ema);
 
   return ema;
 };
