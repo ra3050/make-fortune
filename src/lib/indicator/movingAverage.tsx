@@ -51,7 +51,7 @@ export const ema = (
   const exponent: number = 2 / (1 + length); // exponent :: 상수
   const mLength = mData.length ?? 0;
 
-  let ema = [];
+  let ema: number[] = [];
   let value: number = 0;
   for (let i = length; i < mLength; i++) {
     if (i !== length) {

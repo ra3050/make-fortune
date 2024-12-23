@@ -1,17 +1,19 @@
 import React from "react";
 
-export interface chartInformation {
+export interface heikinashiInformation {
+  timeFrame: number;
   open: number;
   high: number;
   low: number;
   close: number;
 }
 
-export const heikinashi = (mData: Array<any>): Array<chartInformation> => {
+export const heikinashi = (mData: Array<any>): Array<heikinashiInformation> => {
   const mLength = mData.length ?? 0;
-  const value: Array<chartInformation> = [];
+  const value: Array<heikinashiInformation> = [];
 
   for (let i = 0; i < mLength; i++) {
+    const timeFrame = mData[i][0] / 1000;
     const open =
       i !== 0
         ? (value[i - 1].open + value[i - 1].close) / 2
@@ -26,6 +28,7 @@ export const heikinashi = (mData: Array<any>): Array<chartInformation> => {
     const low = Math.min(parseFloat(mData[i][3]), open, close); // 캔들차트 저가, 하이킨아시 시가, 하이킨아시 종사 중 최고가
 
     value.push({
+      timeFrame: timeFrame,
       open: open,
       high,
       low,
