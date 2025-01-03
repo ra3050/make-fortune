@@ -50,6 +50,17 @@ export const calcMainTimeFrame = (interval: string): timeFrameInfo => {
   };
 };
 
+export const calcTimeFrameToString = (timeFrame: number): string => {
+  const date = new Date(timeFrame * 1000); // 초 단위를 밀리초로 변환
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // 월은 0부터 시작
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return `${year}.${month}.${day} ${hours}:${minutes}`;
+};
+
 /**
  * closetTimeFrame: 현재 시간에서 가장 가까운 시간 값
  * interval: 인터벌 시간 값

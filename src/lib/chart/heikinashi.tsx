@@ -30,13 +30,13 @@ export const heikinashi = (mData: Array<any>): Array<heikinashiInformation> => {
     value.push({
       timeFrame: timeFrame,
       open: open,
-      high,
-      low,
+      high: high,
+      low: low,
       close: close,
     });
   }
 
-  console.log("heikinashi: ", value);
+  // console.log("heikinashi: ", value);
 
   return value;
 };

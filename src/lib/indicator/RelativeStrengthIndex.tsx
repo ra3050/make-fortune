@@ -81,19 +81,18 @@ export const rsiFourMul = (
   interval: string = "1d"
 ): number[] => {
   let timeFrame = calcMainTimeFrame(interval);
-  console.log("current timeframe : ", timeFrame);
 
   const change = [];
   for (let i = 0; i < marketData.length; i++) {
     if (chartType === 1) {
       if (marketData[i].timeFrame % (timeFrame.intervalTime * 4) === 0) {
-        console.log(
-          "timeframe ",
-          marketData[i].timeFrame,
-          "dividing ",
-          marketData[i].timeFrame / timeFrame.intervalTime,
-          marketData[i].timeFrame % timeFrame.intervalTime
-        );
+        // console.log(
+        //   "timeframe ",
+        //   marketData[i].timeFrame,
+        //   "dividing ",
+        //   marketData[i].timeFrame / timeFrame.intervalTime,
+        //   marketData[i].timeFrame % timeFrame.intervalTime
+        // );
         if (i + 1 < marketData.length) {
           change.push(marketData[i + 1].close - marketData[i].close);
         }
@@ -135,6 +134,6 @@ export const rsiFourMul = (
     if (u === 0) return 0;
     return 100 - 100 / (1 + u / d);
   });
-  console.log("calc same rsi four mul: ", rsi);
+  // console.log("calc same rsi four mul: ", rsi);
   return rsi;
 };
