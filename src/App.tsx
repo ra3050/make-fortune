@@ -6,7 +6,11 @@ import "./App.css";
 import { klines, price } from "lib/api/market/bianaceAPI";
 import { ema, movingAverageInfo, sma } from "lib/indicator/movingAverage";
 import { heikinashi, heikinashiInformation } from "lib/chart/heikinashi";
-import { rsi, rsiFourMul } from "lib/indicator/RelativeStrengthIndex";
+import {
+  rsi,
+  rsiFourMul,
+  rsiInformation,
+} from "lib/indicator/RelativeStrengthIndex";
 import { emarsi } from "lib/stategy/ema_rsi";
 
 const fetchTickerPrice = async () => {
@@ -30,8 +34,8 @@ function App() {
   const [heikinData, setHeikinData] = useState<heikinashiInformation[]>([]); // 하이킨아시 데이터
   const [smaArray, setSmaArray] = useState([]);
   const [emaArray, setEmaArray] = useState<movingAverageInfo[]>([]);
-  const [rsiArray, setRsiArray] = useState<number[]>([]);
-  const [rsiFourMulArray, setRsiFourMulArray] = useState<number[]>([]);
+  const [rsiArray, setRsiArray] = useState<rsiInformation[]>([]);
+  const [rsiFourMulArray, setRsiFourMulArray] = useState<rsiInformation[]>([]);
 
   const [interval, setInterval] = useState<string>("4h");
 
@@ -113,29 +117,33 @@ function App() {
 
         const c = [];
         c.push(
-          { length: 89, ma: ema(cs, 89) },
-          { length: 84, ma: ema(cs, 84) },
-          { length: 144, ma: ema(cs, 144) },
-          { length: 136, ma: ema(cs, 136) },
-          { length: 233, ma: ema(cs, 233) },
-          { length: 220, ma: ema(cs, 220) },
-          { length: 377, ma: ema(cs, 377) },
-          { length: 356, ma: ema(cs, 356) },
-          { length: 610, ma: ema(cs, 610) },
-          { length: 576, ma: ema(cs, 576) },
-          { length: 987, ma: ema(cs, 987) },
-          { length: 932, ma: ema(cs, 932) },
-          { length: 1597, ma: ema(cs, 1597) },
-          { length: 1508, ma: ema(cs, 1508) },
-          { length: 2584, ma: ema(cs, 2584) },
-          { length: 2440, ma: ema(cs, 2440) }
+          ema(cs, 89),
+          ema(cs, 84),
+          ema(cs, 144),
+          ema(cs, 136),
+          ema(cs, 233),
+          ema(cs, 220),
+          ema(cs, 377),
+          ema(cs, 356),
+          ema(cs, 610),
+          ema(cs, 576),
+          ema(cs, 987),
+          ema(cs, 932),
+          ema(cs, 1597),
+          ema(cs, 1508),
+          ema(cs, 2584),
+          ema(cs, 2440)
         );
         setEmaArray(c);
+        console.log(c);
 
         const rsiArr = rsi(cs, 14, 1);
         const rsiFourMulArr = rsiFourMul(cs, 14, 1, interval);
         setRsiArray(rsiArr);
         setRsiFourMulArray(rsiFourMulArr);
+
+        console.log(rsiArr);
+        console.log(rsiFourMulArr);
       }
     });
   };

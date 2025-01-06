@@ -56,7 +56,7 @@ export const ema = (
   length: number = 13,
   chartType: number = 1,
   timeStamp?: number
-): Array<number> => {
+): movingAverageInfo => {
   if (length <= 1) {
     return mData[-2][4]; // clsoe 가격 반환
   }
@@ -64,35 +64,62 @@ export const ema = (
   const exponent: number = 2 / (1 + length); // exponent :: 상수
   const mLength = mData.length ?? 0;
 
-  let ema: number[] = [];
+  let ema: movingAverageInfo = {
+    length: length,
+    ma: [],
+  };
+  let timeFrameInfo: timeFrameInfo[] = [];
   let value: number = 0;
   for (let i = 0; i < mLength; i++) {
     if (i !== 0) {
       if (chartType === 1) {
         value = mData[i].close * exponent + value * (1 - exponent);
+
+        timeFrameInfo.push({
+          timeFrame: mData[i].timeFrame,
+          value: value,
+        });
       } else {
         value = parseFloat(mData[i][4]) * exponent + value * (1 - exponent); // (금일종가 * 승수) + (전일 EMA * (1 - 승수))
+
+        timeFrameInfo.push({
+          timeFrame: parseFloat(mData[i][0]),
+          value: value,
+        });
       }
     } else {
       // ema가 시작되는 부분
       if (chartType === 1) {
         value = mData[i].close;
+
+        timeFrameInfo.push({
+          timeFrame: mData[i].timeFrame,
+          value: value,
+        });
       } else {
         value = parseFloat(mData[i][4]);
+
+        timeFrameInfo.push({
+          timeFrame: parseFloat(mData[i][0]),
+          value: value,
+        });
       }
     }
-
-    ema.push(value);
   }
 
-  ema = [...ema].splice(length, mLength);
+  ema["ma"] = timeFrameInfo;
 
   // console.log("calc ema for :: \n", ema);
 
   return ema;
 };
 
+export interface timeFrameInfo {
+  timeFrame: number;
+  value: number;
+}
+
 export interface movingAverageInfo {
   length: number;
-  ma: number[];
+  ma: timeFrameInfo[];
 }
