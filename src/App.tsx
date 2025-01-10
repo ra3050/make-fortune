@@ -1,6 +1,25 @@
 import React, { useEffect, useState } from "react";
 import btc1d from "./resource/BINANCE_BTCUSDT, 1D.csv";
+import btc12h from "./resource/BINANCE_BTCUSDT, 720.csv";
+import btc6h from "./resource/BINANCE_BTCUSDT, 360.csv";
 import btc4h from "./resource/BINANCE_BTCUSDT, 240.csv";
+import btc3h from "./resource/BINANCE_BTCUSDT, 180.csv";
+import btc2h from "./resource/BINANCE_BTCUSDT, 120.csv";
+import btc1h from "./resource/BINANCE_BTCUSDT, 60.csv";
+import btc45m from "./resource/BINANCE_BTCUSDT, 45.csv";
+import btc30m from "./resource/BINANCE_BTCUSDT, 30.csv";
+import btc15m from "./resource/BINANCE_BTCUSDT, 15.csv";
+import btc5m from "./resource/BINANCE_BTCUSDT, 5.csv";
+import eth1d from "./resource/ETHUSDT/BINANCE_ETHUSDT, 1D.csv";
+import eth12h from "./resource/ETHUSDT/BINANCE_ETHUSDT, 720.csv";
+import eth6h from "./resource/ETHUSDT/BINANCE_ETHUSDT, 360.csv";
+import eth4h from "./resource/ETHUSDT/BINANCE_ETHUSDT, 240.csv";
+import eth3h from "./resource/ETHUSDT/BINANCE_ETHUSDT, 180.csv";
+import eth2h from "./resource/ETHUSDT/BINANCE_ETHUSDT, 120.csv";
+import eth1h from "./resource/ETHUSDT/BINANCE_ETHUSDT, 60.csv";
+import eth30m from "./resource/ETHUSDT/BINANCE_ETHUSDT, 30.csv";
+import eth15m from "./resource/ETHUSDT/BINANCE_ETHUSDT, 15.csv";
+import eth5m from "./resource/ETHUSDT/BINANCE_ETHUSDT, 5.csv";
 import logo from "./logo.svg";
 import "./App.css";
 import { klines, price } from "lib/api/market/bianaceAPI";
@@ -28,16 +47,24 @@ const fetchTickerPrice = async () => {
 
 function App() {
   const [marketData, setMarketData] = useState([]); // restAPI로 불러온 데이터
-  const [marketCsvData, setMarketCsvData] = useState<heikinashiInformation[]>(
-    []
-  );
+
   const [heikinData, setHeikinData] = useState<heikinashiInformation[]>([]); // 하이킨아시 데이터
-  const [smaArray, setSmaArray] = useState([]);
   const [emaArray, setEmaArray] = useState<movingAverageInfo[]>([]);
   const [rsiArray, setRsiArray] = useState<rsiInformation[]>([]);
   const [rsiFourMulArray, setRsiFourMulArray] = useState<rsiInformation[]>([]);
 
-  const [interval, setInterval] = useState<string>("4h");
+  const [condition, setCondition] = useState<paramsInvestmentStrategy[]>([]); // emarsi 조건을 충족시키기 위한 데이터
+  const marketInterval: string[] = [
+    "1d",
+    "12h",
+    "6h",
+    "4h",
+    "2h",
+    "1h",
+    "30m",
+    "15m",
+    "5m",
+  ];
 
   const fetchMarketData = async (
     symbol: string,
@@ -46,9 +73,15 @@ function App() {
   ) => {
     try {
       const response = await klines(symbol, interval, limit);
+      const csvRes = await readMarketData(symbol, interval);
 
       if (response && response.data) {
+        // 서버데이터 저장
         setMarketData(response.data);
+
+        // 서버데이터와 csv데이터를 불러와 데이터를 정렬합니다.
+        const serverData = heikinashi(response.data);
+        sortMarketData(symbol, interval, csvRes, serverData);
       }
     } catch (e) {
       console.log(e);
@@ -57,11 +90,37 @@ function App() {
   };
 
   // market data csv read
-  const readMarketData = async () => {
+  const readMarketData = async (
+    symbol: string,
+    interval: string
+  ): Promise<heikinashiInformation[]> => {
     let csvData: heikinashiInformation[] = [];
 
     try {
-      const response = await fetch(btc4h);
+      let response: Response = new Response();
+      if (symbol === "BTCUSDT") {
+        if (interval === "1d") response = await fetch(btc1d);
+        if (interval === "12h") response = await fetch(btc12h);
+        if (interval === "6h") response = await fetch(btc6h);
+        if (interval === "4h") response = await fetch(btc4h);
+        if (interval === "2h") response = await fetch(btc2h);
+        if (interval === "1h") response = await fetch(btc1h);
+        if (interval === "30m") response = await fetch(btc30m);
+        if (interval === "15m") response = await fetch(btc15m);
+        if (interval === "5m") response = await fetch(btc5m);
+      }
+      if (symbol === "ETHUSDT") {
+        if (interval === "1d") response = await fetch(eth1d);
+        if (interval === "12h") response = await fetch(eth12h);
+        if (interval === "6h") response = await fetch(eth6h);
+        if (interval === "4h") response = await fetch(eth4h);
+        if (interval === "2h") response = await fetch(eth2h);
+        if (interval === "1h") response = await fetch(eth1h);
+        if (interval === "30m") response = await fetch(eth30m);
+        if (interval === "15m") response = await fetch(eth15m);
+        if (interval === "5m") response = await fetch(eth5m);
+      }
+
       if (!response.ok) {
         throw new Error(`HTTP Error: ${response.status}`);
       }
@@ -80,15 +139,17 @@ function App() {
           close: parseFloat(element[4]),
         });
       }
-
-      setMarketCsvData(csvData);
     } catch (e) {
       console.log("csv 파일로드 에러, ", e);
+    } finally {
+      return csvData;
     }
   };
 
-  // csv데이터와 서버호출 데이터의 첫번째 타임프레임과 같은 값을 찾아 해당부분부터 값을 병합합니다.
+  // 서버데이터와 csv데이터를 불러와 정렬하며 ema, rsi를 계산하여 반영합니다.
   const sortMarketData = (
+    symbol: string,
+    interval: string,
     csvData: heikinashiInformation[],
     serverData: heikinashiInformation[]
   ) => {
@@ -113,9 +174,7 @@ function App() {
         //   cs
         // );
 
-        setHeikinData(cs);
-
-        const c = [];
+        const c: movingAverageInfo[] = [];
         c.push(
           ema(cs, 89),
           ema(cs, 84),
@@ -134,38 +193,46 @@ function App() {
           ema(cs, 2584),
           ema(cs, 2440)
         );
-        setEmaArray(c);
-        console.log(c);
 
         const rsiArr = rsi(cs, 14, 1);
         const rsiFourMulArr = rsiFourMul(cs, 14, 1, interval);
-        setRsiArray(rsiArr);
-        setRsiFourMulArray(rsiFourMulArr);
-
-        console.log(rsiArr);
-        console.log(rsiFourMulArr);
+        // setEmaArray(c);
+        // setRsiArray(rsiArr);
+        // setRsiFourMulArray(rsiFourMulArr);
+        // setHeikinData(cs);
+        setCondition((prev) => [
+          ...prev,
+          {
+            symbol: symbol,
+            interval: interval,
+            heikin: cs,
+            ema: c,
+            rsi: rsiArr,
+            rsifourmul: rsiFourMulArr,
+          },
+        ]);
       }
     });
   };
 
   useEffect(() => {
-    fetchMarketData("BTCUSDT", interval, 1000);
-    readMarketData();
+    // const callInvestmentStrategy = setInterval(() => {
+
+    // }, 1000);
+
+    marketInterval.forEach((interval: string) => {
+      setTimeout(() => {
+        fetchMarketData("BTCUSDT", interval, 1000);
+        fetchMarketData("ETHUSDT", interval, 1000);
+      }, 1000);
+    });
+
+    return () => {
+      // clearInterval(callInvestmentStrategy);
+    };
   }, []);
 
   useEffect(() => {
-    if (marketData.length !== 0) {
-      // heikinashi 및 rsi
-      const heikin = heikinashi(marketData);
-      setHeikinData(heikin);
-    }
-  }, [marketData]);
-
-  useEffect(() => {
-    if (heikinData.length !== 0 && marketCsvData.length !== 0) {
-      sortMarketData(marketCsvData, heikinData);
-    }
-
     if (
       heikinData.length !== 0 &&
       emaArray.length !== 0 &&
@@ -174,7 +241,11 @@ function App() {
     ) {
       emarsi(heikinData, emaArray, rsiArray, rsiFourMulArray);
     }
-  }, [heikinData, marketCsvData]);
+  }, [heikinData]);
+
+  useEffect(() => {
+    console.log(condition);
+  }, [condition]);
 
   return (
     <div className="App">
@@ -194,6 +265,15 @@ function App() {
       </header>
     </div>
   );
+}
+
+interface paramsInvestmentStrategy {
+  symbol: string;
+  interval: string;
+  heikin: heikinashiInformation[];
+  ema: movingAverageInfo[];
+  rsi: rsiInformation[];
+  rsifourmul: rsiInformation[];
 }
 
 export default App;
