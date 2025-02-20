@@ -1,6 +1,6 @@
 import { heikinashiInformation } from "lib/chart/heikinashi";
 import React from "react";
-import { calcMainTimeFrame, calculateClose } from "utils/calculate";
+import { calculateClose } from "utils/calculate";
 
 /**
  * 지수 가중 이동 평균으로써 rsi의 up down값을 계산하는데 사용됩니다.
@@ -58,6 +58,7 @@ export const rsi = (
   length: number,
   chartType: number = 1
 ): rsiInformation[] => {
+  // 이전값과 종가를 뺀 값을 계산하여 반환합니다.
   const change = calculateClose(marketData, chartType);
 
   const up = change.map((c, i) => {
@@ -76,7 +77,7 @@ export const rsi = (
   });
   const upRMA = rma(up, length);
   const downRMA = rma(down, length);
-  const rsi = upRMA.map((u, i) => {
+  let rsi = upRMA.map((u, i) => {
     const d = downRMA[i];
     if (d.value === 0) return { timeFrame: u.timeFrame, value: 100 };
     if (u.value === 0) return { timeFrame: u.timeFrame, value: 0 };
@@ -86,120 +87,16 @@ export const rsi = (
     };
   });
 
-  // console.log("calc same rsi : ", rsi);
-
-  return rsi;
-};
-
-/**
- * 현재 시간에서 4배수에 해당하는 시간의 rsi를 반환합니다.
- * 캔들 차트는 마켓데이터를 그대로받습니다.
- * 하이킨 아시 차트는 하이킨아시로 변형된 차트를 받습니다. (heikinashi함수 사용)
- * @param marketData 시장데이터
- * @param length rsi길이
- * @param chartType 캔들 = 0, 하이킨아시 = 1, default: 1
- * @param interval 현재 차트의 시간
- */
-export const rsiFourMul = (
-  marketData: Array<any | heikinashiInformation>,
-  length: number,
-  chartType: number = 1,
-  interval: string = "1d"
-): rsiInformation[] => {
-  let timeFrame = calcMainTimeFrame(interval);
-
-  const change = [];
-  for (let i = 0; i < marketData.length; i++) {
-    if (chartType === 1) {
-      if (marketData[i].timeFrame % (timeFrame.intervalTime * 4) === 0) {
-        // console.log(
-        //   "timeframe ",
-        //   marketData[i].timeFrame,
-        //   "dividing ",
-        //   marketData[i].timeFrame / timeFrame.intervalTime,
-        //   marketData[i].timeFrame % timeFrame.intervalTime
-        // );
-        if (i + 1 < marketData.length) {
-          const tf = marketData[i + 1].timeFrame; // heikinashi에서 sec단위로 변경된 ms->s 불필요
-          change.push({
-            timeFrame: tf,
-            value: marketData[i + 1].close - marketData[i].close,
-          });
-        }
-        if (i + 2 < marketData.length) {
-          const tf = marketData[i + 2].timeFrame; // heikinashi에서 sec단위로 변경된 ms->s 불필요
-          change.push({
-            timeFrame: tf,
-            value: marketData[i + 2].close - marketData[i].close,
-          });
-        }
-        if (i + 3 < marketData.length) {
-          const tf = marketData[i + 3].timeFrame; // heikinashi에서 sec단위로 변경된 ms->s 불필요
-          change.push({
-            timeFrame: tf,
-            value: marketData[i + 3].close - marketData[i].close,
-          });
-        }
-        if (i + 4 < marketData.length) {
-          const tf = marketData[i + 4].timeFrame; // heikinashi에서 sec단위로 변경된 ms->s 불필요
-          change.push({
-            timeFrame: tf,
-            value: marketData[i + 4].close - marketData[i].close,
-          });
-        }
-      }
-    } else if (chartType === 0) {
-      if (marketData[i][0] % timeFrame.intervalTime === 0) {
-        if (i + 1 < marketData.length) {
-          const tf = marketData[i + 1][0]; // heikinashi에서 sec단위로 변경된 ms->s 불필요
-          change.push({
-            timeFrame: tf,
-            value: marketData[i + 1][4] - marketData[i][4],
-          });
-        }
-        if (i + 2 < marketData.length) {
-          const tf = marketData[i + 2][0]; // heikinashi에서 sec단위로 변경된 ms->s 불필요
-          change.push({
-            timeFrame: tf,
-            value: marketData[i + 2][4] - marketData[i][4],
-          });
-        }
-        if (i + 3 < marketData.length) {
-          const tf = marketData[i + 3][0]; // heikinashi에서 sec단위로 변경된 ms->s 불필요
-          change.push({
-            timeFrame: tf,
-            value: marketData[i + 3][4] - marketData[i][4],
-          });
-        }
-        if (i + 4 < marketData.length) {
-          const tf = marketData[i + 4][0]; // heikinashi에서 sec단위로 변경된 ms->s 불필요
-          change.push({
-            timeFrame: tf,
-            value: marketData[i + 4][4] - marketData[i][4],
-          });
-        }
-      }
+  // rsi의 길이를 시장데이터 길이와 맞춥니다.
+  const ac = marketData.length - rsi.length;
+  if (0 < ac) {
+    for (let i = 0; i < ac; i++) {
+      rsi = [{ timeFrame: 0, value: 0 }, ...rsi];
     }
   }
 
-  const up = change.map((c) => {
-    return { timeFrame: c.timeFrame, value: Math.max(c.value, 0) };
-  });
-  const down = change.map((c) => {
-    return { timeFrame: c.timeFrame, value: Math.abs(Math.min(c.value, 0)) };
-  });
-  const upRMA = rma(up, length);
-  const downRMA = rma(down, length);
-  const rsi = upRMA.map((u, i) => {
-    const d = downRMA[i];
-    if (d.value === 0) return { timeFrame: u.timeFrame, value: 100 };
-    if (u.value === 0) return { timeFrame: u.timeFrame, value: 0 };
-    return {
-      timeFrame: u.timeFrame,
-      value: 100 - 100 / (1 + u.value / d.value),
-    };
-  });
-  console.log("calc same rsi four mul: ", rsi);
+  // console.log("calc same rsi : ", rsi);
+
   return rsi;
 };
 

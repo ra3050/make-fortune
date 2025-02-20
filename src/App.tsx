@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from "react";
+import btc4d from "./resource/BINANCE_BTCUSDT, 4D.csv";
+import btc2d from "./resource/BINANCE_BTCUSDT, 2D.csv";
 import btc1d from "./resource/BINANCE_BTCUSDT, 1D.csv";
 import btc12h from "./resource/BINANCE_BTCUSDT, 720.csv";
 import btc6h from "./resource/BINANCE_BTCUSDT, 360.csv";
 import btc4h from "./resource/BINANCE_BTCUSDT, 240.csv";
-import btc3h from "./resource/BINANCE_BTCUSDT, 180.csv";
 import btc2h from "./resource/BINANCE_BTCUSDT, 120.csv";
 import btc1h from "./resource/BINANCE_BTCUSDT, 60.csv";
-import btc45m from "./resource/BINANCE_BTCUSDT, 45.csv";
 import btc30m from "./resource/BINANCE_BTCUSDT, 30.csv";
 import btc15m from "./resource/BINANCE_BTCUSDT, 15.csv";
-import btc5m from "./resource/BINANCE_BTCUSDT, 5.csv";
 import eth1d from "./resource/ETHUSDT/BINANCE_ETHUSDT, 1D.csv";
 import eth12h from "./resource/ETHUSDT/BINANCE_ETHUSDT, 720.csv";
 import eth6h from "./resource/ETHUSDT/BINANCE_ETHUSDT, 360.csv";
@@ -25,12 +24,8 @@ import "./App.css";
 import { klines, price } from "lib/api/market/bianaceAPI";
 import { ema, movingAverageInfo, sma } from "lib/indicator/movingAverage";
 import { heikinashi, heikinashiInformation } from "lib/chart/heikinashi";
-import {
-  rsi,
-  rsiFourMul,
-  rsiInformation,
-} from "lib/indicator/RelativeStrengthIndex";
-import { emarsi } from "lib/stategy/ema_rsi";
+import { rsi, rsiInformation } from "lib/indicator/RelativeStrengthIndex";
+// import { emarsi } from "lib/stategy/ema_rsi";
 
 const fetchTickerPrice = async () => {
   try {
@@ -65,6 +60,7 @@ function App() {
     "15m",
   ];
 
+  // 시장데이터를 호출합니다 (2000개 제한)
   const fetchMarketData = async (
     symbol: string,
     interval: string,
@@ -83,12 +79,12 @@ function App() {
         sortMarketData(symbol, interval, csvRes, serverData);
       }
     } catch (e) {
-      console.log(e);
+      console.log("market data host error: ", e);
       throw e;
     }
   };
 
-  // market data csv read
+  // csv에 저장된 마켓 데이터를 불러옵니다
   const readMarketData = async (
     symbol: string,
     interval: string
@@ -98,6 +94,8 @@ function App() {
     try {
       let response: Response = new Response();
       if (symbol === "BTCUSDT") {
+        if (interval === "4d") response = await fetch(btc4d);
+        if (interval === "2d") response = await fetch(btc2d);
         if (interval === "1d") response = await fetch(btc1d);
         if (interval === "12h") response = await fetch(btc12h);
         if (interval === "6h") response = await fetch(btc6h);
@@ -106,7 +104,6 @@ function App() {
         if (interval === "1h") response = await fetch(btc1h);
         if (interval === "30m") response = await fetch(btc30m);
         if (interval === "15m") response = await fetch(btc15m);
-        if (interval === "5m") response = await fetch(btc5m);
       }
       if (symbol === "ETHUSDT") {
         if (interval === "1d") response = await fetch(eth1d);
@@ -153,6 +150,8 @@ function App() {
     serverData: heikinashiInformation[]
   ) => {
     csvData.forEach((item, index) => {
+      // 아 여기서 걸러지는구나, 맞는 시간이 없거나 하는 문제가 있겠지 고작해봐야 타임프레임 차이는 1000개밖에 안나니까
+      // 그러면 csv파일들을 교체해 줘야겠네 4시간까지 교체해주고 2d, 4d 추가해주자
       if (item.timeFrame === serverData[0].timeFrame) {
         const spliceCsvData = csvData.splice(0, index);
 
@@ -170,7 +169,9 @@ function App() {
         //   "spliceServerData: ",
         //   serverData,
         //   "cs: ",
-        //   cs
+        //   cs,
+        //   "interval:",
+        //   interval
         // );
 
         const c: movingAverageInfo[] = [];
@@ -194,11 +195,7 @@ function App() {
         );
 
         const rsiArr = rsi(cs, 14, 1);
-        const rsiFourMulArr = rsiFourMul(cs, 14, 1, interval);
-        // setEmaArray(c);
-        // setRsiArray(rsiArr);
-        // setRsiFourMulArray(rsiFourMulArr);
-        // setHeikinData(cs);
+
         setCondition((prev) => [
           ...prev,
           {
@@ -207,7 +204,6 @@ function App() {
             heikin: cs,
             ema: c,
             rsi: rsiArr,
-            rsifourmul: rsiFourMulArr,
           },
         ]);
       }
@@ -215,36 +211,13 @@ function App() {
   };
 
   useEffect(() => {
-    // const callInvestmentStrategy = setInterval(() => {
-
-    // }, 1000);
-
     marketInterval.forEach((interval: string) => {
-      setTimeout(() => {
-        // API 다중호출시 에러발생 위험을 최소화 하기 위해 1초간격으로 호출합니다.
-        fetchMarketData("BTCUSDT", interval, 1000);
-        fetchMarketData("ETHUSDT", interval, 1000);
-      }, 1000);
+      fetchMarketData("BTCUSDT", interval, 1000);
+      // fetchMarketData("ETHUSDT", interval, 1000);
     });
-
-    return () => {
-      // clearInterval(callInvestmentStrategy);
-    };
   }, []);
 
   useEffect(() => {
-    if (
-      heikinData.length !== 0 &&
-      emaArray.length !== 0 &&
-      rsiArray.length !== 0 &&
-      rsiFourMulArray.length !== 0
-    ) {
-      // emarsi(heikinData, emaArray, rsiArray, rsiFourMulArray);
-    }
-  }, [heikinData]);
-
-  useEffect(() => {
-    //조건수정필요
     if (condition.length === 16) {
       const nv = condition.sort((a, b) => a.heikin.length - b.heikin.length);
       nv.forEach((value) => {
@@ -253,11 +226,9 @@ function App() {
         const marketHeikin = value.heikin;
         const ema = value.ema;
         const rsi = value.rsi;
-        const rsiFourmul = value.rsifourmul;
 
         if (symbol === "BTCUSDT") {
-          // console.log(value);
-          emarsi(marketHeikin, ema, rsi, rsiFourmul, symbol, interval);
+          console.log(condition);
         }
       });
     }
@@ -289,7 +260,6 @@ interface paramsInvestmentStrategy {
   heikin: heikinashiInformation[];
   ema: movingAverageInfo[];
   rsi: rsiInformation[];
-  rsifourmul: rsiInformation[];
 }
 
 export default App;

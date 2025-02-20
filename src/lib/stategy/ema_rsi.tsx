@@ -1,3 +1,11 @@
+/**
+ * 기존 ema_rsi 기술 관점이 변경되어
+ * 아래코드는 더이상 사용하지 않습니다.
+ *
+ * 기존관점은 일정한 흐름 내에서는 승률이 좋았지만,
+ * 흐름이 반전되는 부분에서는 승률이 좋지 못하여 폐기되었습니다.
+ */
+
 import { heikinashiInformation } from "lib/chart/heikinashi";
 import { movingAverageInfo } from "lib/indicator/movingAverage";
 import { rsiInformation } from "lib/indicator/RelativeStrengthIndex";

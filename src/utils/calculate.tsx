@@ -2,8 +2,9 @@ import { heikinashiInformation } from "lib/chart/heikinashi";
 import React from "react";
 
 /**
+ * RSI계산에 필요한 아래와 같은 값을 반환합니다
  * 시장데이터를 입력받아가 종가의 변화를 계산합니다.
- * 현재종가 - 이전종가
+ * (현재종가 - 이전종가)
  * @param data 시장 마켓데이터를 받습니다
  * @param chartType 캔들 = 0, 하이킨아시 = 1, default: 1
  */
@@ -24,32 +25,10 @@ export const calculateClose = (
 };
 
 /**
- *
- * @param interval 타임프레임 계산 시간값
- * @returns interval과 가장 가까운 타임프레임을 반환합니다.
+ * 타임프레임 값을 문자열로 반환합니다.    ex: 2025.02.20 16:51
+ * @param timeFrame
+ * @returns
  */
-export const calcMainTimeFrame = (interval: string): timeFrameInfo => {
-  const currentTimeFrame = Math.floor(Date.now() / 1000); // 초 단위 변환
-  let timeSec = 0; // 기준이되는 시간의 초 단위 값
-
-  const value = parseInt(interval.slice(0, interval.length - 1));
-  if (interval.includes("m")) {
-    timeSec = value * 60;
-  } else if (interval.includes("h")) {
-    timeSec = value * 3600;
-  } else if (interval.includes("d")) {
-    timeSec = value * 86400;
-  }
-
-  const closetTimeFrame = Math.floor(currentTimeFrame / timeSec) * timeSec; // 가장 가까운 시간의 타임프레임 확인
-
-  return {
-    closetTimeFrame: closetTimeFrame,
-    interval: interval,
-    intervalTime: timeSec,
-  };
-};
-
 export const calcTimeFrameToString = (timeFrame: number): string => {
   const date = new Date(timeFrame * 1000); // 초 단위를 밀리초로 변환
   const year = date.getFullYear();
