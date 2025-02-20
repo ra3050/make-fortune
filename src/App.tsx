@@ -63,7 +63,6 @@ function App() {
     "1h",
     "30m",
     "15m",
-    "5m",
   ];
 
   const fetchMarketData = async (
@@ -222,6 +221,7 @@ function App() {
 
     marketInterval.forEach((interval: string) => {
       setTimeout(() => {
+        // API 다중호출시 에러발생 위험을 최소화 하기 위해 1초간격으로 호출합니다.
         fetchMarketData("BTCUSDT", interval, 1000);
         fetchMarketData("ETHUSDT", interval, 1000);
       }, 1000);
@@ -239,12 +239,28 @@ function App() {
       rsiArray.length !== 0 &&
       rsiFourMulArray.length !== 0
     ) {
-      emarsi(heikinData, emaArray, rsiArray, rsiFourMulArray);
+      // emarsi(heikinData, emaArray, rsiArray, rsiFourMulArray);
     }
   }, [heikinData]);
 
   useEffect(() => {
-    console.log(condition);
+    //조건수정필요
+    if (condition.length === 16) {
+      const nv = condition.sort((a, b) => a.heikin.length - b.heikin.length);
+      nv.forEach((value) => {
+        const symbol = value.symbol;
+        const interval = value.interval;
+        const marketHeikin = value.heikin;
+        const ema = value.ema;
+        const rsi = value.rsi;
+        const rsiFourmul = value.rsifourmul;
+
+        if (symbol === "BTCUSDT") {
+          // console.log(value);
+          emarsi(marketHeikin, ema, rsi, rsiFourmul, symbol, interval);
+        }
+      });
+    }
   }, [condition]);
 
   return (

@@ -199,7 +199,7 @@ export const rsiFourMul = (
       value: 100 - 100 / (1 + u.value / d.value),
     };
   });
-  // console.log("calc same rsi four mul: ", rsi);
+  console.log("calc same rsi four mul: ", rsi);
   return rsi;
 };
 
