@@ -1,4 +1,5 @@
 import { heikinashiInformation } from "lib/chart/heikinashi";
+import { movingAverageInfo } from "lib/indicator/movingAverage";
 import React from "react";
 
 /**

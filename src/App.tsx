@@ -25,6 +25,7 @@ import { klines, price } from "lib/api/market/bianaceAPI";
 import { ema, movingAverageInfo, sma } from "lib/indicator/movingAverage";
 import { heikinashi, heikinashiInformation } from "lib/chart/heikinashi";
 import { rsi, rsiInformation } from "lib/indicator/RelativeStrengthIndex";
+import { emaBullDivergence } from "lib/stategy/emaDivergence";
 // import { emarsi } from "lib/stategy/ema_rsi";
 
 const fetchTickerPrice = async () => {
@@ -50,14 +51,14 @@ function App() {
 
   const [condition, setCondition] = useState<paramsInvestmentStrategy[]>([]); // emarsi 조건을 충족시키기 위한 데이터
   const marketInterval: string[] = [
-    "1d",
-    "12h",
-    "6h",
-    "4h",
-    "2h",
+    // "1d",
+    // "12h",
+    // "6h",
+    // "4h",
+    // "2h",
     "1h",
-    "30m",
-    "15m",
+    // "30m",
+    // "15m",
   ];
 
   // 시장데이터를 호출합니다 (2000개 제한)
@@ -218,19 +219,10 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (condition.length === 16) {
+    if (condition.length !== 0) {
       const nv = condition.sort((a, b) => a.heikin.length - b.heikin.length);
-      nv.forEach((value) => {
-        const symbol = value.symbol;
-        const interval = value.interval;
-        const marketHeikin = value.heikin;
-        const ema = value.ema;
-        const rsi = value.rsi;
 
-        if (symbol === "BTCUSDT") {
-          console.log(condition);
-        }
-      });
+      emaBullDivergence(nv[0].heikin, nv[0].ema, nv[0].rsi, "1h");
     }
   }, [condition]);
 
