@@ -41,6 +41,10 @@ export const calcTimeFrameToString = (timeFrame: number): string => {
   return `${year}.${month}.${day} ${hours}:${minutes}`;
 };
 
+export const calcIsBetween = (a: number, b: number, c: number): boolean => {
+  return (a <= c && c <= b) || (b <= c && c <= a);
+};
+
 /**
  * closetTimeFrame: 현재 시간에서 가장 가까운 시간 값
  * interval: 인터벌 시간 값

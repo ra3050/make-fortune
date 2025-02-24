@@ -222,7 +222,13 @@ function App() {
     if (condition.length !== 0) {
       const nv = condition.sort((a, b) => a.heikin.length - b.heikin.length);
 
-      emaBullDivergence(nv[0].heikin, nv[0].ema, nv[0].rsi, "1h");
+      const longSignalInfo = emaBullDivergence(
+        nv[0].heikin,
+        nv[0].ema,
+        nv[0].rsi,
+        "1h"
+      );
+      console.log(longSignalInfo);
     }
   }, [condition]);
 
