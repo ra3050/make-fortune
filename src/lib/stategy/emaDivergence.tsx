@@ -1,7 +1,7 @@
+import React from "react";
 import { heikinashi, heikinashiInformation } from "lib/chart/heikinashi";
 import { movingAverageInfo } from "lib/indicator/movingAverage";
 import { rsiInformation } from "lib/indicator/RelativeStrengthIndex";
-import React from "react";
 import { calcIsBetween, calcTimeFrameToString } from "utils/calculate";
 
 /**
@@ -18,13 +18,13 @@ export const emaBullDivergence = (
   rsi: rsiInformation[],
   interval: string,
   symbol: string = "BTCUSDT"
-): divergenceInformation[] | void => {
+): divergenceInformation[] => {
   // timeFrame 불일치 오류 검사
-  if (heikin.length != rsi.length) {
+  if (heikin.length !== rsi.length) {
     console.log(
       "emaBullDivergence전략 실행중 rsiInformation에 timeFrame 오류가 발생했습니다."
     );
-    return;
+    return [];
   }
 
   const marketLength = heikin.length;
@@ -231,7 +231,7 @@ export const emaBullDivergence = (
 };
 
 // 데이터를 어떻게 기록할 것인가를 생각해보자
-interface divergenceInformation {
+export interface divergenceInformation {
   timeFrame: number;
   timeToString: string;
   value: number;
