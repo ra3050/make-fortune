@@ -32,14 +32,6 @@ import {
 import styled from "styled-components";
 import Chart from "components/ui/chart/chart";
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-`;
-
 const fetchTickerPrice = async () => {
   try {
     const response = await price("BTCUSDT");
@@ -64,8 +56,8 @@ const MainPage = () => {
     // "12h",
     // "6h",
     // "4h",
-    // "2h",
-    "1h",
+    "2h",
+    // "1h",
     // "30m",
     // "15m",
   ];

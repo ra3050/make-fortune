@@ -58,16 +58,19 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
     if (!canvas) return;
     canvas.width = chartProps?.heikin
       ? chartProps.heikin.length
-      : window.innerWidth; // 데이터의 개수 만큼 길이 설정  defualt: window.innerWidth
+      : window.innerWidth;
     canvas.height = window.innerHeight;
 
     const context = canvas.getContext("2d");
     if (!context) return;
+
+    // 기본 설정 초기화
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.clearRect(0, 0, canvas.width, canvas.height);
     context.strokeStyle = "black";
     context.lineWidth = 0.5;
-    context.scale(1, window.innerHeight / 110000);
-    contextRef.current = context;
 
+    contextRef.current = context;
     setCtx(context);
   }, [chartProps?.ema]);
 
@@ -76,7 +79,6 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
     const handleScrollCanvas = () => {
       if (canvasWrapperRef.current) {
         setScrollX(canvasWrapperRef.current.scrollLeft);
-        console.log("scrollX", canvasWrapperRef.current.scrollLeft);
       }
     };
 
@@ -93,41 +95,61 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
   }, []);
 
   useEffect(() => {
-    if (chartProps?.ema && chartProps?.heikin) {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const context = canvas.getContext("2d");
-      if (!context) return;
-      contextRef.current = context;
+    if (!chartProps?.ema || !chartProps?.heikin || !ctx) return;
 
-      context.beginPath();
-      context.moveTo(0, 0);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-      let drawX = 0;
+    // 컨텍스트 초기화
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (isDrawX < scrollX + window.innerWidth) {
-        // ema 선을 화면에 그려줍니다
-        chartProps.ema.forEach((ma: movingAverageInfo) => {
-          context.moveTo(isDrawX, ma.ma[isDrawX].value);
-          for (let i = isDrawX; i < scrollX + window.innerWidth; i++) {
-            if (i >= ma.ma.length) break;
-            context.lineTo(i, ma.ma[i].value);
-            drawX = i;
-          }
-        });
+    // 보이는 영역의 데이터만 계산
+    const visibleData = chartProps.heikin.slice(
+      scrollX,
+      scrollX + window.innerWidth
+    );
+    const maxHeikin = Math.max(...visibleData.map((item) => item.high));
+    const minHeikin = Math.min(...visibleData.map((item) => item.low));
 
-        for (let i = isDrawX; i < scrollX + window.innerWidth; i++) {
-          if (i >= chartProps.heikin.length) break;
-          context.moveTo(i, chartProps.heikin[i].open);
-          context.lineTo(i, chartProps.heikin[i].close);
+    // 여백 추가
+    const padding = (maxHeikin - minHeikin) * 0.1;
+    const yScale =
+      (window.innerHeight * 0.8) / (maxHeikin - minHeikin + padding * 2);
+
+    // 스케일 및 위치 조정
+    ctx.translate(0, window.innerHeight);
+    ctx.scale(1, -yScale);
+    ctx.translate(0, -(minHeikin - padding));
+
+    ctx.beginPath();
+
+    // EMA 선 그리기
+    chartProps.ema.forEach((ma: movingAverageInfo) => {
+      ctx.beginPath();
+      let isFirst = true;
+
+      for (let i = scrollX; i < scrollX + window.innerWidth; i++) {
+        if (i >= ma.ma.length) break;
+        if (isFirst) {
+          ctx.moveTo(i, ma.ma[i].value);
+          isFirst = false;
+        } else {
+          ctx.lineTo(i, ma.ma[i].value);
         }
-
-        context.stroke();
-        setIsDrawX(drawX);
       }
-      setCtx(context);
+      ctx.stroke();
+    });
+
+    // 캔들 그리기
+    ctx.beginPath();
+    for (let i = scrollX; i < scrollX + window.innerWidth; i++) {
+      if (i >= chartProps.heikin.length) break;
+      ctx.moveTo(i, chartProps.heikin[i].high);
+      ctx.lineTo(i, chartProps.heikin[i].low);
     }
-  }, [scrollX]);
+    ctx.stroke();
+  }, [scrollX, chartProps?.ema, chartProps?.heikin]);
 
   const startDrawing = () => {
     setIsDrawing(true);
