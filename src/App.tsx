@@ -37,7 +37,8 @@ const fetchTickerPrice = async () => {
     const response = await price("BTCUSDT");
 
     if (response && response.data) {
-      // console.log(response.data);
+      console.log(response.data);
+      //@
     }
   } catch (error) {
     console.log(error);
