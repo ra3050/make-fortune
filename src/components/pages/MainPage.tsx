@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import btc4d from "../../resource/BINANCE_BTCUSDT, 4D.csv";
 import btc2d from "../../resource/BINANCE_BTCUSDT, 2D.csv";
 import btc1d from "../../resource/BINANCE_BTCUSDT, 1D.csv";
@@ -32,59 +32,65 @@ import {
 import styled from "styled-components";
 import Chart from "components/ui/chart/chart";
 
-const fetchTickerPrice = async () => {
-  try {
-    const response = await price("BTCUSDT");
+const IntervalWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+`;
 
-    if (response && response.data) {
-      console.log(response.data);
-    }
-  } catch (error) {
-    console.log(error);
-    throw error;
-  }
-};
+const IntervalButton = styled.button`
+  width: 60px;
+  height: 30px;
+  border-radius: 10px;
+  border: 1px solid #000;
+  background-color: #000;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 10px;
+`;
 
 const MainPage = () => {
   const [marketData, setMarketData] = useState([]); // restAPI로 불러온 데이터
   const [basePriceArr, setBasePriceArr] = useState<number[]>([]);
 
-  const [condition, setCondition] = useState<paramsInvestmentStrategy[]>([]); // emarsi 조건을 충족시키기 위한 데이터
+  const [condition, setCondition] = useState<paramsInvestmentStrategy>(); // emarsi 조건을 충족시키기 위한 데이터
   const [longSignal, setLongSignal] = useState<divergenceInformation[]>();
   const marketInterval: string[] = [
-    // "1d",
-    // "12h",
-    // "6h",
-    // "4h",
+    "1d",
+    "12h",
+    "6h",
+    "4h",
     "2h",
-    // "1h",
-    // "30m",
-    // "15m",
+    "1h",
+    "30m",
+    "15m",
   ];
+  const [isMarketInterval, setIsMarketInterval] = useState<string>("12h");
 
-  // 시장데이터를 호출합니다 (2000개 제한)
-  const fetchMarketData = async (
-    symbol: string,
-    interval: string,
-    limit: number
-  ) => {
-    try {
-      const response = await klines(symbol, interval, limit);
-      const csvRes = await readMarketData(symbol, interval);
+  const fetchMarketData = useCallback(
+    async (symbol: string, interval: string, limit: number) => {
+      try {
+        const response = await klines(symbol, interval, limit);
+        const csvRes = await readMarketData(symbol, interval);
 
-      if (response && response.data) {
-        // 서버데이터 저장
-        setMarketData(response.data);
-
-        // 서버데이터와 csv데이터를 불러와 데이터를 정렬합니다.
-        const serverData = heikinashi(response.data);
-        sortMarketData(symbol, interval, csvRes, serverData);
+        if (response && response.data) {
+          setMarketData(response.data);
+          const serverData = heikinashi(response.data);
+          sortMarketData(symbol, interval, csvRes, serverData);
+        }
+      } catch (e) {
+        console.log("market data host error: ", e);
+        throw e;
       }
-    } catch (e) {
-      console.log("market data host error: ", e);
-      throw e;
-    }
-  };
+    },
+    []
+  );
 
   // csv에 저장된 마켓 데이터를 불러옵니다
   const readMarketData = async (
@@ -192,42 +198,35 @@ const MainPage = () => {
           ema(cs, 1597),
           ema(cs, 1508),
           ema(cs, 2584),
-          ema(cs, 2440)
+          ema(cs, 2440),
+          ema(cs, 4181),
+          ema(cs, 3948)
         );
 
         const rsiArr = rsi(cs, 14, 1);
 
-        setCondition((prev) => [
-          ...prev,
-          {
-            symbol: symbol,
-            interval: interval,
-            heikin: cs,
-            ema: c,
-            rsi: rsiArr,
-          },
-        ]);
+        setCondition({
+          symbol: symbol,
+          interval: interval,
+          heikin: cs,
+          ema: c,
+          rsi: rsiArr,
+        });
       }
     });
   };
 
   useEffect(() => {
-    marketInterval.forEach((interval: string) => {
-      fetchMarketData("BTCUSDT", interval, 60000);
-      // fetchMarketData("ETHUSDT", interval, 1000);
-    });
-  }, []);
+    fetchMarketData("BTCUSDT", isMarketInterval, 60000);
+  }, [isMarketInterval, fetchMarketData]);
 
   useEffect(() => {
-    if (condition.length !== 0) {
-      // interval 값으로 정렬
-      const nv = condition.sort((a, b) => a.heikin.length - b.heikin.length);
-
+    if (condition?.interval === isMarketInterval) {
       const longSignalInfo = emaBullDivergence(
-        nv[0].heikin,
-        nv[0].ema,
-        nv[0].rsi,
-        "1h"
+        condition.heikin,
+        condition.ema,
+        condition.rsi,
+        isMarketInterval
       ); // 하나만 화면에 표기하도록 설정되어있
       // 1. 인터벌 한번에 처리
       // 2. 인터벌 여러번 나눠서 처리
@@ -236,17 +235,33 @@ const MainPage = () => {
       setLongSignal(longSignalInfo);
       console.log(condition);
     }
-  }, [condition]);
+  }, [condition, isMarketInterval]);
+
+  const handleIntervalButton = (interval: string) => {
+    setIsMarketInterval(interval);
+  };
 
   return (
-    <Chart
-      {...{
-        divergence: longSignal,
-        heikin: condition[0]?.heikin,
-        ema: condition[0]?.ema,
-        rsi: condition[0]?.rsi,
-      }}
-    />
+    <div>
+      <IntervalWrapper>
+        {marketInterval.map((interval) => (
+          <IntervalButton
+            onClick={() => handleIntervalButton(interval)}
+            key={interval}
+          >
+            {interval}
+          </IntervalButton>
+        ))}
+      </IntervalWrapper>
+      <Chart
+        {...{
+          divergence: longSignal,
+          heikin: condition?.heikin,
+          ema: condition?.ema,
+          rsi: condition?.rsi,
+        }}
+      />
+    </div>
   ); // condition의 값을 어떻게 컨트롤 할 것인가 ==> 추후 수정하면서 고칠것
 };
 

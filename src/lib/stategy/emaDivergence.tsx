@@ -95,6 +95,8 @@ export const emaBullDivergence = (
       const ema1508 = ema[13].ma;
       const ema2584 = ema[14].ma;
       const ema2440 = ema[15].ma;
+      const ema4181 = ema[16].ma;
+      const ema3948 = ema[17].ma;
 
       if (calcIsBetween(heikin[i].high, heikin[i].low, ema89[i].value)) {
         console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
@@ -217,6 +219,22 @@ export const emaBullDivergence = (
         });
       }
       if (calcIsBetween(heikin[i].high, heikin[i].low, ema2440[i].value)) {
+        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info.push({
+          timeFrame: rsi[i].timeFrame,
+          timeToString: time,
+          value: heikin[i].close,
+        });
+      }
+      if (calcIsBetween(heikin[i].high, heikin[i].low, ema4181[i].value)) {
+        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info.push({
+          timeFrame: rsi[i].timeFrame,
+          timeToString: time,
+          value: heikin[i].close,
+        });
+      }
+      if (calcIsBetween(heikin[i].high, heikin[i].low, ema3948[i].value)) {
         console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
         info.push({
           timeFrame: rsi[i].timeFrame,
