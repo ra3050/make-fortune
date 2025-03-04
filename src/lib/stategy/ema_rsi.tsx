@@ -1,3 +1,11 @@
+/**
+ * 기존 ema_rsi 기술 관점이 변경되어
+ * 아래코드는 더이상 사용하지 않습니다.
+ *
+ * 기존관점은 일정한 흐름 내에서는 승률이 좋았지만,
+ * 흐름이 반전되는 부분에서는 승률이 좋지 못하여 폐기되었습니다.
+ */
+
 import { heikinashiInformation } from "lib/chart/heikinashi";
 import { movingAverageInfo } from "lib/indicator/movingAverage";
 import { rsiInformation } from "lib/indicator/RelativeStrengthIndex";
@@ -6,6 +14,8 @@ import { calcTimeFrameToString } from "utils/calculate";
 
 /**
  * 롱 관점으로 ema와 ema4배수 사이에 종가가 위치하고 rsi조건이 맞는지 확인합니다.
+ * 주의: 하이킨아시 차트로만 동작합니다.
+ * 주의: ema_rsi 관점은 폐기합니다.
  * @param chartInfo heikinashi or marketData
  * @param ema 배열로 정렬된 ema 데이터
  * @param rsi 배열로 정렬된 rsi 데이터
@@ -17,7 +27,8 @@ export const emarsi = (
   ema: movingAverageInfo[],
   rsi: rsiInformation[],
   rsiFourMul: rsiInformation[],
-  chartType: number = 1
+  symbol: string,
+  interval: string
 ) => {
   const ema89 = ema[0].ma;
   const ema89_4 = ema[1].ma;
@@ -38,242 +49,254 @@ export const emarsi = (
 
   const date = new Date();
 
-  if (chartType === 1) {
-    const chartlength = chartInfo.length;
+  const chartlength = chartInfo.length;
 
-    // rsi, rsiFourMul의 타임프레임이 처음 일치하는 부분을 찾아 해당 타임프레임 값이 첫번째 인덱스에 위치할 수 있도록 변경합니다.
-    const firstTimeFrame = rsiFourMul[0].timeFrame;
-    let sRsi = rsi.slice(1, rsi.length);
+  // rsi, rsiFourMul의 타임프레임이 처음 일치하는 부분을 찾아 해당 타임프레임 값이 첫번째 인덱스에 위치할 수 있도록 변경합니다.
+  const firstTimeFrame = rsiFourMul[0].timeFrame;
+  let sRsi = rsi.slice(1, rsi.length);
 
-    // chartlength에 맞춰 rsi크기를 맞춥니다.
-    const ac = chartlength - sRsi.length;
-    if (0 < ac) {
-      for (let i = 0; i < ac; i++) {
-        sRsi = [{ timeFrame: 0, value: 0 }, ...sRsi];
-      }
+  // chartlength에 맞춰 rsi크기를 맞춥니다.
+  const ac = chartlength - sRsi.length;
+  if (0 < ac) {
+    for (let i = 0; i < ac; i++) {
+      sRsi = [{ timeFrame: 0, value: 0 }, ...sRsi];
     }
+  }
 
-    for (let i = 0; i < chartlength; i++) {
-      // 0. ema 타임프레임이 rsi와 일치하는지 확인합니다.
-      if (firstTimeFrame <= sRsi[i].timeFrame) {
-        // 타임프레임이 현재 시간 기준으로 72시간 이내에 있는지 확인합니다. // 3600000 = 1h, 259200000 = 72h
-        const curTF =
-          Math.floor(Date.parse(date.toISOString()) / 1000) - 259200;
-        if (sRsi[i].timeFrame < curTF) {
-          continue;
-        }
-        // 1. low값이 ema 혹은 ema4배수 하단에 위치하는지 확인하며, 종가가 ema4배수 아래에 위치하는지 확인합니다.
-        if (
-          chartInfo[i].low < ema89[i].value &&
-          ema89_4[i].value < chartInfo[i].close
-        ) {
-          // 2. rsi 4배수가 과매도 상태인가
-          if (rsiFourMul[i].value < 30) {
-            // 3. 이전 rsi, rsi 4배수가 과매도 상태인가
-            if (rsiFourMul[i - 1].value < 30 && sRsi[i - 1].value < 30) {
-              // 4. rsi가 이전보다 높은가 (반등했는가)
-              if (sRsi[i - 1].value < sRsi[i].value) {
-                // 조건 디지게 많네 시발거
-                console.log(
-                  "ema89, ",
-                  "close: ",
-                  chartInfo[i].close,
-                  "low: ",
-                  chartInfo[i].low,
-                  "UTC: ",
-                  calcTimeFrameToString(chartInfo[i].timeFrame)
-                );
-              }
+  for (let i = 0; i < chartlength; i++) {
+    // 0. ema 타임프레임이 rsi와 일치하는지 확인합니다.
+    if (firstTimeFrame <= sRsi[i].timeFrame) {
+      // 타임프레임이 현재 시간 기준으로 72시간 이내에 있는지 확인합니다. // 3600000 = 1h, 259200000 = 72h
+      const curTF = Math.floor(Date.parse(date.toISOString()) / 1000) - 259200;
+      // if (sRsi[i].timeFrame < curTF) {
+      //   continue;
+      // }
+      // 1. low값이 ema 혹은 ema4배수 하단에 위치하는지 확인하며, 종가가 ema4배수 아래에 위치하는지 확인합니다.
+      if (
+        chartInfo[i].low < ema89[i].value &&
+        ema89_4[i].value < chartInfo[i].close
+      ) {
+        // 2. rsi 4배수가 과매도 상태인가
+        if (rsiFourMul[i].value < 30) {
+          // 3. 이전 rsi, rsi 4배수가 과매도 상태인가
+          if (rsiFourMul[i - 1].value < 30 && sRsi[i - 1].value < 30) {
+            // 4. rsi가 이전보다 높은가 (반등했는가)
+            if (sRsi[i - 1].value < sRsi[i].value) {
+              // 조건 디지게 많네 시발거
+              console.log(
+                "ema89, ",
+                `${symbol} `,
+                `${interval}`,
+                "close: ",
+                chartInfo[i].close,
+                "low: ",
+                chartInfo[i].low,
+                "UTC: ",
+                calcTimeFrameToString(chartInfo[i].timeFrame)
+              );
             }
           }
         }
-
-        // 1. low값이 ema 혹은 ema4배수 하단에 위치하는지 확인하며, 종가가 ema4배수 아래에 위치하는지 확인합니다.
-        if (
-          chartInfo[i].low < ema144[i].value &&
-          ema144_4[i].value < chartInfo[i].close
-        ) {
-          // 2. rsi 4배수가 과매도 상태인가
-          if (rsiFourMul[i].value < 30) {
-            // 3. 이전 rsi, rsi 4배수가 과매도 상태인가
-            if (rsiFourMul[i - 1].value < 30 && sRsi[i - 1].value < 30) {
-              // 4. rsi가 이전보다 높은가 (반등했는가)
-              if (sRsi[i - 1].value < sRsi[i].value) {
-                // 조건 디지게 많네 시발거
-                console.log(
-                  "ema144, ",
-                  "close: ",
-                  chartInfo[i].close,
-                  "low: ",
-                  chartInfo[i].low,
-                  "UTC: ",
-                  calcTimeFrameToString(chartInfo[i].timeFrame)
-                );
-              }
-            }
-          }
-        }
-
-        // 1. low값이 ema 혹은 ema4배수 하단에 위치하는지 확인하며, 종가가 ema4배수 아래에 위치하는지 확인합니다.
-        if (
-          chartInfo[i].low < ema233[i].value &&
-          ema233_4[i].value < chartInfo[i].close
-        ) {
-          // 2. rsi 4배수가 과매도 상태인가
-          if (rsiFourMul[i].value < 30) {
-            // 3. 이전 rsi, rsi 4배수가 과매도 상태인가
-            if (rsiFourMul[i - 1].value < 30 && sRsi[i - 1].value < 30) {
-              // 4. rsi가 이전보다 높은가 (반등했는가)
-              if (sRsi[i - 1].value < sRsi[i].value) {
-                // 조건 디지게 많네 시발거
-                console.log(
-                  "ema233, ",
-                  "close: ",
-                  chartInfo[i].close,
-                  "low: ",
-                  chartInfo[i].low,
-                  "UTC: ",
-                  calcTimeFrameToString(chartInfo[i].timeFrame)
-                );
-              }
-            }
-          }
-        }
-
-        // 1. low값이 ema 혹은 ema4배수 하단에 위치하는지 확인하며, 종가가 ema4배수 아래에 위치하는지 확인합니다.
-        if (
-          chartInfo[i].low < ema377[i].value &&
-          ema377_4[i].value < chartInfo[i].close
-        ) {
-          // 2. rsi 4배수가 과매도 상태인가
-          if (rsiFourMul[i].value < 30) {
-            // 3. 이전 rsi, rsi 4배수가 과매도 상태인가
-            if (rsiFourMul[i - 1].value < 30 && sRsi[i - 1].value < 30) {
-              // 4. rsi가 이전보다 높은가 (반등했는가)
-              if (sRsi[i - 1].value < sRsi[i].value) {
-                // 조건 디지게 많네 시발거
-                console.log(
-                  "ema377, ",
-                  "close: ",
-                  chartInfo[i].close,
-                  "low: ",
-                  chartInfo[i].low,
-                  "UTC: ",
-                  calcTimeFrameToString(chartInfo[i].timeFrame)
-                );
-              }
-            }
-          }
-        }
-
-        // 1. low값이 ema 혹은 ema4배수 하단에 위치하는지 확인하며, 종가가 ema4배수 아래에 위치하는지 확인합니다.
-        if (
-          chartInfo[i].low < ema610[i].value &&
-          ema610_4[i].value < chartInfo[i].close
-        ) {
-          // 2. rsi 4배수가 과매도 상태인가
-          if (rsiFourMul[i].value < 30) {
-            // 3. 이전 rsi, rsi 4배수가 과매도 상태인가
-            if (rsiFourMul[i - 1].value < 30 && sRsi[i - 1].value < 30) {
-              // 4. rsi가 이전보다 높은가 (반등했는가)
-              if (sRsi[i - 1].value < sRsi[i].value) {
-                // 조건 디지게 많네 시발거
-                console.log(
-                  "ema610, ",
-                  "close: ",
-                  chartInfo[i].close,
-                  "low: ",
-                  chartInfo[i].low,
-                  "UTC: ",
-                  calcTimeFrameToString(chartInfo[i].timeFrame)
-                );
-              }
-            }
-          }
-        }
-
-        // 1. low값이 ema 혹은 ema4배수 하단에 위치하는지 확인하며, 종가가 ema4배수 아래에 위치하는지 확인합니다.
-        if (
-          chartInfo[i].low < ema987[i].value &&
-          ema987_4[i].value < chartInfo[i].close
-        ) {
-          // 2. rsi 4배수가 과매도 상태인가
-          if (rsiFourMul[i].value < 30) {
-            // 3. 이전 rsi, rsi 4배수가 과매도 상태인가
-            if (rsiFourMul[i - 1].value < 30 && sRsi[i - 1].value < 30) {
-              // 4. rsi가 이전보다 높은가 (반등했는가)
-              if (sRsi[i - 1].value < sRsi[i].value) {
-                // 조건 디지게 많네 시발거
-                console.log(
-                  "ema987, ",
-                  "close: ",
-                  chartInfo[i].close,
-                  "low: ",
-                  chartInfo[i].low,
-                  "UTC: ",
-                  calcTimeFrameToString(chartInfo[i].timeFrame)
-                );
-              }
-            }
-          }
-        }
-
-        // 1. low값이 ema 혹은 ema4배수 하단에 위치하는지 확인하며, 종가가 ema4배수 아래에 위치하는지 확인합니다.
-        if (
-          chartInfo[i].low < ema1597[i].value &&
-          ema1597_4[i].value < chartInfo[i].close
-        ) {
-          // 2. rsi 4배수가 과매도 상태인가
-          if (rsiFourMul[i].value < 30) {
-            // 3. 이전 rsi, rsi 4배수가 과매도 상태인가
-            if (rsiFourMul[i - 1].value < 30 && sRsi[i - 1].value < 30) {
-              // 4. rsi가 이전보다 높은가 (반등했는가)
-              if (sRsi[i - 1].value < sRsi[i].value) {
-                // 조건 디지게 많네 시발거
-                console.log(
-                  "ema1597, ",
-                  "close: ",
-                  chartInfo[i].close,
-                  "low: ",
-                  chartInfo[i].low,
-                  "UTC: ",
-                  calcTimeFrameToString(chartInfo[i].timeFrame)
-                );
-              }
-            }
-          }
-        }
-
-        // 1. low값이 ema 혹은 ema4배수 하단에 위치하는지 확인하며, 종가가 ema4배수 아래에 위치하는지 확인합니다.
-        if (
-          chartInfo[i].low < ema2584[i].value &&
-          ema2584_4[i].value < chartInfo[i].close
-        ) {
-          // 2. rsi 4배수가 과매도 상태인가
-          if (rsiFourMul[i].value < 30) {
-            // 3. 이전 rsi, rsi 4배수가 과매도 상태인가
-            if (rsiFourMul[i - 1].value < 30 && sRsi[i - 1].value < 30) {
-              // 4. rsi가 이전보다 높은가 (반등했는가)
-              if (sRsi[i - 1].value < sRsi[i].value) {
-                // 조건 디지게 많네 시발거
-                console.log(
-                  "ema2584, ",
-                  "close: ",
-                  chartInfo[i].close,
-                  "low: ",
-                  chartInfo[i].low,
-                  "UTC: ",
-                  calcTimeFrameToString(chartInfo[i].timeFrame)
-                );
-              }
-            }
-          }
-        }
-      } else {
-        console.log("ERROR, 타임프레임이 일치하지 않습니다.");
       }
+
+      // 1. low값이 ema 혹은 ema4배수 하단에 위치하는지 확인하며, 종가가 ema4배수 아래에 위치하는지 확인합니다.
+      if (
+        chartInfo[i].low < ema144[i].value &&
+        ema144_4[i].value < chartInfo[i].close
+      ) {
+        // 2. rsi 4배수가 과매도 상태인가
+        if (rsiFourMul[i].value < 30) {
+          // 3. 이전 rsi, rsi 4배수가 과매도 상태인가
+          if (rsiFourMul[i - 1].value < 30 && sRsi[i - 1].value < 30) {
+            // 4. rsi가 이전보다 높은가 (반등했는가)
+            if (sRsi[i - 1].value < sRsi[i].value) {
+              // 조건 디지게 많네 시발거
+              console.log(
+                "ema144, ",
+                `${symbol} `,
+                `${interval}`,
+                "close: ",
+                chartInfo[i].close,
+                "low: ",
+                chartInfo[i].low,
+                "UTC: ",
+                calcTimeFrameToString(chartInfo[i].timeFrame)
+              );
+            }
+          }
+        }
+      }
+
+      // 1. low값이 ema 혹은 ema4배수 하단에 위치하는지 확인하며, 종가가 ema4배수 아래에 위치하는지 확인합니다.
+      if (
+        chartInfo[i].low < ema233[i].value &&
+        ema233_4[i].value < chartInfo[i].close
+      ) {
+        // 2. rsi 4배수가 과매도 상태인가
+        if (rsiFourMul[i].value < 30) {
+          // 3. 이전 rsi, rsi 4배수가 과매도 상태인가
+          if (rsiFourMul[i - 1].value < 30 && sRsi[i - 1].value < 30) {
+            // 4. rsi가 이전보다 높은가 (반등했는가)
+            if (sRsi[i - 1].value < sRsi[i].value) {
+              // 조건 디지게 많네 시발거
+              console.log(
+                "ema233, ",
+                `${symbol} `,
+                `${interval}`,
+                "close: ",
+                chartInfo[i].close,
+                "low: ",
+                chartInfo[i].low,
+                "UTC: ",
+                calcTimeFrameToString(chartInfo[i].timeFrame)
+              );
+            }
+          }
+        }
+      }
+
+      // 1. low값이 ema 혹은 ema4배수 하단에 위치하는지 확인하며, 종가가 ema4배수 아래에 위치하는지 확인합니다.
+      if (
+        chartInfo[i].low < ema377[i].value &&
+        ema377_4[i].value < chartInfo[i].close
+      ) {
+        // 2. rsi 4배수가 과매도 상태인가
+        if (rsiFourMul[i].value < 30) {
+          // 3. 이전 rsi, rsi 4배수가 과매도 상태인가
+          if (rsiFourMul[i - 1].value < 30 && sRsi[i - 1].value < 30) {
+            // 4. rsi가 이전보다 높은가 (반등했는가)
+            if (sRsi[i - 1].value < sRsi[i].value) {
+              // 조건 디지게 많네 시발거
+              console.log(
+                "ema377, ",
+                `${symbol} `,
+                `${interval}`,
+                "close: ",
+                chartInfo[i].close,
+                "low: ",
+                chartInfo[i].low,
+                "UTC: ",
+                calcTimeFrameToString(chartInfo[i].timeFrame)
+              );
+            }
+          }
+        }
+      }
+
+      // 1. low값이 ema 혹은 ema4배수 하단에 위치하는지 확인하며, 종가가 ema4배수 아래에 위치하는지 확인합니다.
+      if (
+        chartInfo[i].low < ema610[i].value &&
+        ema610_4[i].value < chartInfo[i].close
+      ) {
+        // 2. rsi 4배수가 과매도 상태인가
+        if (rsiFourMul[i].value < 30) {
+          // 3. 이전 rsi, rsi 4배수가 과매도 상태인가
+          if (rsiFourMul[i - 1].value < 30 && sRsi[i - 1].value < 30) {
+            // 4. rsi가 이전보다 높은가 (반등했는가)
+            if (sRsi[i - 1].value < sRsi[i].value) {
+              // 조건 디지게 많네 시발거
+              console.log(
+                "ema610, ",
+                `${symbol} `,
+                `${interval}`,
+                "close: ",
+                chartInfo[i].close,
+                "low: ",
+                chartInfo[i].low,
+                "UTC: ",
+                calcTimeFrameToString(chartInfo[i].timeFrame)
+              );
+            }
+          }
+        }
+      }
+
+      // 1. low값이 ema 혹은 ema4배수 하단에 위치하는지 확인하며, 종가가 ema4배수 아래에 위치하는지 확인합니다.
+      if (
+        chartInfo[i].low < ema987[i].value &&
+        ema987_4[i].value < chartInfo[i].close
+      ) {
+        // 2. rsi 4배수가 과매도 상태인가
+        if (rsiFourMul[i].value < 30) {
+          // 3. 이전 rsi, rsi 4배수가 과매도 상태인가
+          if (rsiFourMul[i - 1].value < 30 && sRsi[i - 1].value < 30) {
+            // 4. rsi가 이전보다 높은가 (반등했는가)
+            if (sRsi[i - 1].value < sRsi[i].value) {
+              // 조건 디지게 많네 시발거
+              console.log(
+                "ema987, ",
+                `${symbol} `,
+                `${interval}`,
+                "close: ",
+                chartInfo[i].close,
+                "low: ",
+                chartInfo[i].low,
+                "UTC: ",
+                calcTimeFrameToString(chartInfo[i].timeFrame)
+              );
+            }
+          }
+        }
+      }
+
+      // 1. low값이 ema 혹은 ema4배수 하단에 위치하는지 확인하며, 종가가 ema4배수 아래에 위치하는지 확인합니다.
+      if (
+        chartInfo[i].low < ema1597[i].value &&
+        ema1597_4[i].value < chartInfo[i].close
+      ) {
+        // 2. rsi 4배수가 과매도 상태인가
+        if (rsiFourMul[i].value < 30) {
+          // 3. 이전 rsi, rsi 4배수가 과매도 상태인가
+          if (rsiFourMul[i - 1].value < 30 && sRsi[i - 1].value < 30) {
+            // 4. rsi가 이전보다 높은가 (반등했는가)
+            if (sRsi[i - 1].value < sRsi[i].value) {
+              // 조건 디지게 많네 시발거
+              console.log(
+                "ema1597, ",
+                `${symbol} `,
+                `${interval}`,
+                "close: ",
+                chartInfo[i].close,
+                "low: ",
+                chartInfo[i].low,
+                "UTC: ",
+                calcTimeFrameToString(chartInfo[i].timeFrame)
+              );
+            }
+          }
+        }
+      }
+
+      // 1. low값이 ema 혹은 ema4배수 하단에 위치하는지 확인하며, 종가가 ema4배수 아래에 위치하는지 확인합니다.
+      if (
+        chartInfo[i].low < ema2584[i].value &&
+        ema2584_4[i].value < chartInfo[i].close
+      ) {
+        // 2. rsi 4배수가 과매도 상태인가
+        if (rsiFourMul[i].value < 30) {
+          // 3. 이전 rsi, rsi 4배수가 과매도 상태인가
+          if (rsiFourMul[i - 1].value < 30 && sRsi[i - 1].value < 30) {
+            // 4. rsi가 이전보다 높은가 (반등했는가)
+            if (sRsi[i - 1].value < sRsi[i].value) {
+              // 조건 디지게 많네 시발거
+              console.log(
+                "ema2584, ",
+                `${symbol} `,
+                `${interval}`,
+                "close: ",
+                chartInfo[i].close,
+                "low: ",
+                chartInfo[i].low,
+                "UTC: ",
+                calcTimeFrameToString(chartInfo[i].timeFrame)
+              );
+            }
+          }
+        }
+      }
+    } else {
+      console.log("ERROR, 타임프레임이 일치하지 않습니다.");
     }
-    //
   }
 };
 
