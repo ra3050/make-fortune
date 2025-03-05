@@ -1,0 +1,34 @@
+{
+  "files": {
+    "main.css": "/static/css/main.dc3b5227.css",
+    "main.js": "/static/js/main.63cc4eff.js",
+    "static/js/453.626e4567.chunk.js": "/static/js/453.626e4567.chunk.js",
+    "static/media/BINANCE_BTCUSDT, 30.csv": "/static/media/BINANCE_BTCUSDT, 30.28034ed3a4ca8acbc22c.csv",
+    "static/media/BINANCE_ETHUSDT, 30.csv": "/static/media/BINANCE_ETHUSDT, 30.3495168ce2e89634bc73.csv",
+    "static/media/BINANCE_BTCUSDT, 60.csv": "/static/media/BINANCE_BTCUSDT, 60.c30f615c8f8ce0101b0a.csv",
+    "static/media/BINANCE_ETHUSDT, 60.csv": "/static/media/BINANCE_ETHUSDT, 60.3b4f7f3971df1cc6f370.csv",
+    "static/media/BINANCE_ETHUSDT, 5.csv": "/static/media/BINANCE_ETHUSDT, 5.802b58f510ad97c68ae5.csv",
+    "static/media/BINANCE_ETHUSDT, 120.csv": "/static/media/BINANCE_ETHUSDT, 120.d618fcd2f4466ef49d96.csv",
+    "static/media/BINANCE_BTCUSDT, 120.csv": "/static/media/BINANCE_BTCUSDT, 120.e26c68fbfa64d0e651cd.csv",
+    "static/media/BINANCE_ETHUSDT, 15.csv": "/static/media/BINANCE_ETHUSDT, 15.973ae257eb797983c94a.csv",
+    "static/media/BINANCE_BTCUSDT, 15.csv": "/static/media/BINANCE_BTCUSDT, 15.f7ac573766a6617cfde3.csv",
+    "static/media/BINANCE_BTCUSDT, 240.csv": "/static/media/BINANCE_BTCUSDT, 240.0675238f7a975e20e69f.csv",
+    "static/media/BINANCE_ETHUSDT, 240.csv": "/static/media/BINANCE_ETHUSDT, 240.c163824d45d23e1ee14f.csv",
+    "static/media/BINANCE_ETHUSDT, 360.csv": "/static/media/BINANCE_ETHUSDT, 360.7b0f57dfeebcbf6d2538.csv",
+    "static/media/BINANCE_BTCUSDT, 360.csv": "/static/media/BINANCE_BTCUSDT, 360.30a8cab2d5c14f41432c.csv",
+    "static/media/BINANCE_ETHUSDT, 720.csv": "/static/media/BINANCE_ETHUSDT, 720.73bb888a09803b97eac2.csv",
+    "static/media/BINANCE_BTCUSDT, 720.csv": "/static/media/BINANCE_BTCUSDT, 720.635636f13b807394fc46.csv",
+    "static/media/BINANCE_BTCUSDT, 1D.csv": "/static/media/BINANCE_BTCUSDT, 1D.8e7ac7dd1b3aa20b6e72.csv",
+    "static/media/BINANCE_ETHUSDT, 1D.csv": "/static/media/BINANCE_ETHUSDT, 1D.ad399f9fb72a30de158a.csv",
+    "static/media/BINANCE_BTCUSDT, 2D.csv": "/static/media/BINANCE_BTCUSDT, 2D.26de3b1a8a3a7128ab15.csv",
+    "static/media/BINANCE_BTCUSDT, 4D.csv": "/static/media/BINANCE_BTCUSDT, 4D.811262a1806ed6d41bf0.csv",
+    "index.html": "/index.html",
+    "main.dc3b5227.css.map": "/static/css/main.dc3b5227.css.map",
+    "main.63cc4eff.js.map": "/static/js/main.63cc4eff.js.map",
+    "453.626e4567.chunk.js.map": "/static/js/453.626e4567.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.dc3b5227.css",
+    "static/js/main.63cc4eff.js"
+  ]
+}
