@@ -109,6 +109,7 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
 
     // 캔들 그리기
     for (let i = scrollX; i < scrollX + window.innerWidth; i++) {
+      // 캔들
       ctx.beginPath();
       if (i >= chartProps.heikin.length) break;
       if (i !== 0 && chartProps.heikin[i].open > chartProps.heikin[i].close) {
@@ -119,7 +120,10 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
       ctx.moveTo(i, chartProps.heikin[i].high);
       ctx.lineTo(i, chartProps.heikin[i].low);
       ctx.stroke();
+
+      // heikin안에 다이버전스를 포함하도록 수정할 필요성 있음 - 3월 6(목) 진행예정
     }
+
     ctx.strokeStyle = "white";
   }, [scrollX, chartProps?.ema, chartProps?.heikin]);
 
