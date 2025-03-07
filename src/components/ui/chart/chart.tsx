@@ -10,6 +10,17 @@ const CanvasWrapper = styled.div`
   overflow-x: auto; // 가로 스크롤 활성화
   overflow-y: hidden; // 세로 스크롤 비활성화
   background: #131722;
+  /* user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none; */
+
+  /* 스크롤바 숨기기 */
+  &::-webkit-scrollbar {
+    display: none; // Chrome, Safari, Opera
+  }
+  -ms-overflow-style: none; // IE, Edge
+  scrollbar-width: none; //Firebox
 `;
 
 const ChartCanvas = (chartProps?: chartProps | null) => {
@@ -21,6 +32,34 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
 
   const [scrollX, setScrollX] = useState(0); // 캔버스 위치
   const canvasHeight = window.innerHeight - 100;
+
+  // 드래그 관련 상태 추가
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  // 마우스 다운 이벤트 핸들러
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!canvasWrapperRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - canvasWrapperRef.current.offsetLeft);
+    setScrollLeft(canvasWrapperRef.current.scrollLeft);
+  };
+
+  // 마우스 이동 이벤트 핸들러
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !canvasWrapperRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - canvasWrapperRef.current.offsetLeft;
+    const walk = startX - x;
+    canvasWrapperRef.current.scrollLeft = scrollLeft + walk;
+    setScrollX(canvasWrapperRef.current.scrollLeft);
+  };
+
+  // 마우스 업 이벤트 핸들러
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -52,11 +91,15 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
     const canvas = canvasWrapperRef.current;
     if (canvas) {
       canvas.addEventListener("scroll", handleScrollCanvas);
+      document.addEventListener("mouseup", handleMouseUp);
+      document.addEventListener("mouseleave", handleMouseUp);
     }
 
     return () => {
       if (canvas) {
         canvas.removeEventListener("scroll", handleScrollCanvas);
+        document.removeEventListener("mouseup", handleMouseUp);
+        document.removeEventListener("mouseleave", handleMouseUp);
       }
     };
   }, []);
@@ -128,7 +171,11 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
   }, [scrollX, chartProps?.ema, chartProps?.heikin]);
 
   return (
-    <CanvasWrapper ref={canvasWrapperRef}>
+    <CanvasWrapper
+      ref={canvasWrapperRef}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+    >
       <canvas ref={canvasRef} />
       <RSICanvas {...{ rsi: chartProps?.rsi, scrollX }} />
     </CanvasWrapper>
