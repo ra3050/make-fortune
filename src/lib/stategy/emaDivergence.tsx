@@ -18,7 +18,7 @@ export const emaBullDivergence = (
   rsi: rsiInformation[],
   interval: string,
   symbol: string = "BTCUSDT"
-): divergenceInformation[] => {
+): heikinashiInformation[] => {
   // timeFrame 불일치 오류 검사
   if (heikin.length !== rsi.length) {
     console.log(
@@ -33,7 +33,7 @@ export const emaBullDivergence = (
   let beta = -1; // rsi 과매도 재진입 시점(index) default: -1
   let a: heikinashiInformation; // alpha 일 때 가격정보
   let b: heikinashiInformation; // beta 일 때 가격정보
-  const info: divergenceInformation[] = [];
+  const info: heikinashiInformation[] = [...heikin];
 
   for (let i = 0; i < marketLength; i++) {
     // 가장 강한 과매도가 발생한 시점
@@ -99,160 +99,152 @@ export const emaBullDivergence = (
       const ema3948 = ema[17].ma;
 
       if (calcIsBetween(heikin[i].high, heikin[i].low, ema89[i].value)) {
-        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
-        info.push({
-          timeFrame: rsi[i].timeFrame,
-          timeToString: time,
-          value: heikin[i].close,
-        });
-      }
-      if (calcIsBetween(heikin[i].high, heikin[i].low, ema84[i].value)) {
-        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
-        info.push({
-          timeFrame: rsi[i].timeFrame,
-          timeToString: time,
-          value: heikin[i].close,
-        });
-      }
-      if (calcIsBetween(heikin[i].high, heikin[i].low, ema144[i].value)) {
-        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
-        info.push({
-          timeFrame: rsi[i].timeFrame,
-          timeToString: time,
-          value: heikin[i].close,
-        });
-      }
-      if (calcIsBetween(heikin[i].high, heikin[i].low, ema136[i].value)) {
-        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
-        info.push({
-          timeFrame: rsi[i].timeFrame,
-          timeToString: time,
-          value: heikin[i].close,
-        });
-      }
-      if (calcIsBetween(heikin[i].high, heikin[i].low, ema233[i].value)) {
-        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
-        info.push({
-          timeFrame: rsi[i].timeFrame,
-          timeToString: time,
-          value: heikin[i].close,
-        });
-      }
-      if (calcIsBetween(heikin[i].high, heikin[i].low, ema220[i].value)) {
-        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
-        info.push({
-          timeFrame: rsi[i].timeFrame,
-          timeToString: time,
-          value: heikin[i].close,
-        });
-      }
-      if (calcIsBetween(heikin[i].high, heikin[i].low, ema377[i].value)) {
-        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
-        info.push({
-          timeFrame: rsi[i].timeFrame,
-          timeToString: time,
-          value: heikin[i].close,
-        });
-      }
-      if (calcIsBetween(heikin[i].high, heikin[i].low, ema356[i].value)) {
-        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
-        info.push({
-          timeFrame: rsi[i].timeFrame,
-          timeToString: time,
-          value: heikin[i].close,
-        });
-      }
-      if (calcIsBetween(heikin[i].high, heikin[i].low, ema610[i].value)) {
-        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
-        info.push({
-          timeFrame: rsi[i].timeFrame,
-          timeToString: time,
-          value: heikin[i].close,
-        });
-      }
-      if (calcIsBetween(heikin[i].high, heikin[i].low, ema576[i].value)) {
-        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
-        info.push({
-          timeFrame: rsi[i].timeFrame,
-          timeToString: time,
-          value: heikin[i].close,
-        });
-      }
-      if (calcIsBetween(heikin[i].high, heikin[i].low, ema987[i].value)) {
-        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
-        info.push({
-          timeFrame: rsi[i].timeFrame,
-          timeToString: time,
-          value: heikin[i].close,
-        });
-      }
-      if (calcIsBetween(heikin[i].high, heikin[i].low, ema932[i].value)) {
-        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
-        info.push({
-          timeFrame: rsi[i].timeFrame,
-          timeToString: time,
-          value: heikin[i].close,
-        });
-      }
-      if (calcIsBetween(heikin[i].high, heikin[i].low, ema1597[i].value)) {
-        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
-        info.push({
-          timeFrame: rsi[i].timeFrame,
-          timeToString: time,
-          value: heikin[i].close,
-        });
-      }
-      if (calcIsBetween(heikin[i].high, heikin[i].low, ema1508[i].value)) {
-        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
-        info.push({
-          timeFrame: rsi[i].timeFrame,
-          timeToString: time,
-          value: heikin[i].close,
-        });
-      }
-      if (calcIsBetween(heikin[i].high, heikin[i].low, ema2584[i].value)) {
-        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
-        info.push({
-          timeFrame: rsi[i].timeFrame,
-          timeToString: time,
-          value: heikin[i].close,
-        });
-      }
-      if (calcIsBetween(heikin[i].high, heikin[i].low, ema2440[i].value)) {
-        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
-        info.push({
-          timeFrame: rsi[i].timeFrame,
-          timeToString: time,
-          value: heikin[i].close,
-        });
-      }
-      if (calcIsBetween(heikin[i].high, heikin[i].low, ema4181[i].value)) {
-        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
-        info.push({
-          timeFrame: rsi[i].timeFrame,
-          timeToString: time,
-          value: heikin[i].close,
-        });
-      }
-      if (calcIsBetween(heikin[i].high, heikin[i].low, ema3948[i].value)) {
-        console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
-        info.push({
-          timeFrame: rsi[i].timeFrame,
-          timeToString: time,
-          value: heikin[i].close,
-        });
+        // console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info[i] = {
+          ...heikin[i],
+          divergence: true,
+        };
+      } else if (calcIsBetween(heikin[i].high, heikin[i].low, ema84[i].value)) {
+        // console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info[i] = {
+          ...heikin[i],
+          divergence: true,
+        };
+      } else if (
+        calcIsBetween(heikin[i].high, heikin[i].low, ema144[i].value)
+      ) {
+        // console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info[i] = {
+          ...heikin[i],
+          divergence: true,
+        };
+      } else if (
+        calcIsBetween(heikin[i].high, heikin[i].low, ema136[i].value)
+      ) {
+        // console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info[i] = {
+          ...heikin[i],
+          divergence: true,
+        };
+      } else if (
+        calcIsBetween(heikin[i].high, heikin[i].low, ema233[i].value)
+      ) {
+        // console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info[i] = {
+          ...heikin[i],
+          divergence: true,
+        };
+      } else if (
+        calcIsBetween(heikin[i].high, heikin[i].low, ema220[i].value)
+      ) {
+        // console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info[i] = {
+          ...heikin[i],
+          divergence: true,
+        };
+      } else if (
+        calcIsBetween(heikin[i].high, heikin[i].low, ema377[i].value)
+      ) {
+        // console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info[i] = {
+          ...heikin[i],
+          divergence: true,
+        };
+      } else if (
+        calcIsBetween(heikin[i].high, heikin[i].low, ema356[i].value)
+      ) {
+        // console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info[i] = {
+          ...heikin[i],
+          divergence: true,
+        };
+      } else if (
+        calcIsBetween(heikin[i].high, heikin[i].low, ema610[i].value)
+      ) {
+        // console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info[i] = {
+          ...heikin[i],
+          divergence: true,
+        };
+      } else if (
+        calcIsBetween(heikin[i].high, heikin[i].low, ema576[i].value)
+      ) {
+        // console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info[i] = {
+          ...heikin[i],
+          divergence: true,
+        };
+      } else if (
+        calcIsBetween(heikin[i].high, heikin[i].low, ema987[i].value)
+      ) {
+        // console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info[i] = {
+          ...heikin[i],
+          divergence: true,
+        };
+      } else if (
+        calcIsBetween(heikin[i].high, heikin[i].low, ema932[i].value)
+      ) {
+        // console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info[i] = {
+          ...heikin[i],
+          divergence: true,
+        };
+      } else if (
+        calcIsBetween(heikin[i].high, heikin[i].low, ema1597[i].value)
+      ) {
+        // console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info[i] = {
+          ...heikin[i],
+          divergence: true,
+        };
+      } else if (
+        calcIsBetween(heikin[i].high, heikin[i].low, ema1508[i].value)
+      ) {
+        // console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info[i] = {
+          ...heikin[i],
+          divergence: true,
+        };
+      } else if (
+        calcIsBetween(heikin[i].high, heikin[i].low, ema2584[i].value)
+      ) {
+        // console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info[i] = {
+          ...heikin[i],
+          divergence: true,
+        };
+      } else if (
+        calcIsBetween(heikin[i].high, heikin[i].low, ema2440[i].value)
+      ) {
+        // console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info[i] = {
+          ...heikin[i],
+          divergence: true,
+        };
+      } else if (
+        calcIsBetween(heikin[i].high, heikin[i].low, ema4181[i].value)
+      ) {
+        // console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info[i] = {
+          ...heikin[i],
+          divergence: true,
+        };
+      } else if (
+        calcIsBetween(heikin[i].high, heikin[i].low, ema3948[i].value)
+      ) {
+        // console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
+        info[i] = {
+          ...heikin[i],
+          divergence: true,
+        };
       }
     }
   }
 
+  // console.log(info);
+
   return info;
 };
-
-// 데이터를 어떻게 기록할 것인가를 생각해보자
-export interface divergenceInformation {
-  timeFrame: number;
-  timeToString: string;
-  value: number;
-}
 
 export const emaBearDivergence = () => {};

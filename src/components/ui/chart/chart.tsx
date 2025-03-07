@@ -1,7 +1,6 @@
 import { heikinashiInformation } from "../../../lib/chart/heikinashi";
 import { movingAverageInfo } from "../../../lib/indicator/movingAverage";
 import { rsiInformation } from "../../../lib/indicator/RelativeStrengthIndex";
-import { divergenceInformation } from "../../../lib/stategy/emaDivergence";
 import React, { useRef, useEffect, useState, useLayoutEffect } from "react";
 import styled from "styled-components";
 import RSICanvas from "./rsi"; // RSICanvas 컴포넌트 임포트
@@ -155,11 +154,19 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
       // 캔들
       ctx.beginPath();
       if (i >= chartProps.heikin.length) break;
-      if (i !== 0 && chartProps.heikin[i].open > chartProps.heikin[i].close) {
-        ctx.strokeStyle = "#F05350";
+
+      // 다이버전스 여부에 따라 색상 설정
+      if (chartProps.heikin[i].divergence) {
+        ctx.strokeStyle = "#FFD700"; // 다이버전스가 있는 경우 금색
+      } else if (
+        i !== 0 &&
+        chartProps.heikin[i].open > chartProps.heikin[i].close
+      ) {
+        ctx.strokeStyle = "#F05350"; // 음봉
       } else {
-        ctx.strokeStyle = "#26A69A";
+        ctx.strokeStyle = "#26A69A"; // 양봉
       }
+
       ctx.moveTo(i, chartProps.heikin[i].high);
       ctx.lineTo(i, chartProps.heikin[i].low);
       ctx.stroke();
@@ -184,7 +191,6 @@ interface chartProps {
   heikin?: heikinashiInformation[];
   ema?: movingAverageInfo[];
   rsi?: rsiInformation[];
-  divergence?: divergenceInformation[];
 }
 
 export default ChartCanvas;

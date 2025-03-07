@@ -25,10 +25,7 @@ import { klines, price } from "../../lib/api/market/bianaceAPI";
 import { ema, movingAverageInfo, sma } from "../../lib/indicator/movingAverage";
 import { heikinashi, heikinashiInformation } from "../../lib/chart/heikinashi";
 import { rsi, rsiInformation } from "../../lib/indicator/RelativeStrengthIndex";
-import {
-  emaBullDivergence,
-  divergenceInformation,
-} from "../../lib/stategy/emaDivergence";
+import { emaBullDivergence } from "../../lib/stategy/emaDivergence";
 import styled from "styled-components";
 import Chart from "components/ui/chart/chart";
 
@@ -60,7 +57,7 @@ const MainPage = () => {
   const [basePriceArr, setBasePriceArr] = useState<number[]>([]);
 
   const [condition, setCondition] = useState<paramsInvestmentStrategy>(); // emarsi 조건을 충족시키기 위한 데이터
-  const [longSignal, setLongSignal] = useState<divergenceInformation[]>();
+  const [longSignal, setLongSignal] = useState<heikinashiInformation[]>();
   const marketInterval: string[] = [
     "1d",
     "12h",
@@ -205,10 +202,12 @@ const MainPage = () => {
 
         const rsiArr = rsi(cs, 14, 1);
 
+        const temp = emaBullDivergence(cs, c, rsiArr, interval);
+
         setCondition({
           symbol: symbol,
           interval: interval,
-          heikin: cs,
+          heikin: temp,
           ema: c,
           rsi: rsiArr,
         });
@@ -219,23 +218,6 @@ const MainPage = () => {
   useEffect(() => {
     fetchMarketData("BTCUSDT", isMarketInterval, 60000);
   }, [isMarketInterval, fetchMarketData]);
-
-  useEffect(() => {
-    if (condition?.interval === isMarketInterval) {
-      const longSignalInfo = emaBullDivergence(
-        condition.heikin,
-        condition.ema,
-        condition.rsi,
-        isMarketInterval
-      ); // 하나만 화면에 표기하도록 설정되어있
-      // 1. 인터벌 한번에 처리
-      // 2. 인터벌 여러번 나눠서 처리
-      // 3. 인터벌 나눠서 처리 후 하나만 화면에 표기
-
-      setLongSignal(longSignalInfo);
-      console.log(condition);
-    }
-  }, [condition, isMarketInterval]);
 
   const handleIntervalButton = (interval: string) => {
     setIsMarketInterval(interval);
@@ -255,7 +237,6 @@ const MainPage = () => {
       </IntervalWrapper>
       <Chart
         {...{
-          divergence: longSignal,
           heikin: condition?.heikin,
           ema: condition?.ema,
           rsi: condition?.rsi,
