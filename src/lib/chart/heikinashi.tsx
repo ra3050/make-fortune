@@ -6,6 +6,7 @@ export interface heikinashiInformation {
   high: number;
   low: number;
   close: number;
+  divergence?: Boolean;
 }
 
 export const heikinashi = (mData: Array<any>): Array<heikinashiInformation> => {
