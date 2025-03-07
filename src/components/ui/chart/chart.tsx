@@ -163,8 +163,6 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
       ctx.moveTo(i, chartProps.heikin[i].high);
       ctx.lineTo(i, chartProps.heikin[i].low);
       ctx.stroke();
-
-      // heikin안에 다이버전스를 포함하도록 수정할 필요성 있음 - 3월 6(목) 진행예정
     }
 
     ctx.strokeStyle = "white";
