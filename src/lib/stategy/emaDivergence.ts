@@ -89,15 +89,34 @@ export const emaBullDivergence = (
     ) {
       const time = calcTimeFrameToString(heikin[i].timeFrame);
 
-      // 조건 2-1. 하이킨아시 몸통, 꼬리 계산
-      const bodyLength = Math.abs(heikin[i].open - heikin[i].close);
+      // 조건 2-1. 하이킨아시 몸통, 꼬리 계산 (현재봉)
+      const bodyWidth = Math.abs(heikin[i].open - heikin[i].close);
       const upperWick =
         heikin[i].high - Math.max(heikin[i].open, heikin[i].close);
       const lowerWick =
         Math.min(heikin[i].open, heikin[i].close) - heikin[i].low;
+      // 조건 2-2, 하이킨아시 몸통, 꼬리 계산 (다음봉)
+      let nbodyWidth = 0;
+      let nUppmerWick = 0;
+      let nLowerWick = 0;
+      if (marketLength - 1 !== i) {
+        nbodyWidth = Math.abs(heikin[i + 1].open - heikin[i + 1].close);
+        nUppmerWick =
+          heikin[i + 1].high -
+          Math.max(heikin[i + 1].open, heikin[i + 1].close);
+        nLowerWick =
+          Math.min(heikin[i + 1].open, heikin[i + 1].close) - heikin[i + 1].low;
+      }
 
-      // 조건 2-2. 길이검사
-      if (bodyLength < upperWick && bodyLength < lowerWick) {
+      // 조건 2-3. 길이검사
+      if (bodyWidth < upperWick && bodyWidth < lowerWick) {
+        info[i] = {
+          ...heikin[i],
+          divergence: true,
+        };
+      }
+      // 조건 2-3. 길이검사
+      if (nbodyWidth < nUppmerWick && nbodyWidth < nLowerWick) {
         info[i] = {
           ...heikin[i],
           divergence: true,

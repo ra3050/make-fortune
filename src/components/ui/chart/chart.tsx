@@ -43,29 +43,6 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
 
-  // 마우스 다운 이벤트 핸들러
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!canvasWrapperRef.current) return;
-    setIsDragging(true);
-    setStartX(e.pageX - canvasWrapperRef.current.offsetLeft);
-    setScrollLeft(canvasWrapperRef.current.scrollLeft);
-  };
-
-  // 마우스 이동 이벤트 핸들러
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !canvasWrapperRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - canvasWrapperRef.current.offsetLeft;
-    const walk = startX - x;
-    canvasWrapperRef.current.scrollLeft = scrollLeft + walk;
-    setScrollX(canvasWrapperRef.current.scrollLeft);
-  };
-
-  // 마우스 업 이벤트 핸들러
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -180,6 +157,29 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
 
     ctx.strokeStyle = "white";
   }, [scrollX, chartProps?.ema, chartProps?.heikin]);
+
+  // 마우스 다운 이벤트 핸들러
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!canvasWrapperRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - canvasWrapperRef.current.offsetLeft);
+    setScrollLeft(canvasWrapperRef.current.scrollLeft);
+  };
+
+  // 마우스 이동 이벤트 핸들러
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !canvasWrapperRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - canvasWrapperRef.current.offsetLeft;
+    const walk = startX - x;
+    canvasWrapperRef.current.scrollLeft = scrollLeft + walk;
+    setScrollX(canvasWrapperRef.current.scrollLeft);
+  };
+
+  // 마우스 업 이벤트 핸들러
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
 
   return (
     <CanvasWrapper
