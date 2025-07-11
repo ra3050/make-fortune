@@ -1,5 +1,3 @@
-import React from "react";
-
 export interface heikinashiInformation {
   timeFrame: number;
   open: number;

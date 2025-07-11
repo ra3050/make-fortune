@@ -1,5 +1,4 @@
 import { heikinashiInformation } from "lib/chart/heikinashi";
-import React from "react";
 
 /**
  * 단일 타임스템프에 대한 sma값을 반환합니다.

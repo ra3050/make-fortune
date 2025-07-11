@@ -52,6 +52,14 @@ const IntervalButton = styled.button`
   margin-right: 10px;
 `;
 
+interface paramsInvestmentStrategy {
+  symbol: string;
+  interval: string;
+  heikin: heikinashiInformation[];
+  ema: movingAverageInfo[];
+  rsi: rsiInformation[];
+}
+
 const MainPage = () => {
   const [marketData, setMarketData] = useState([]); // restAPI로 불러온 데이터
   const [basePriceArr, setBasePriceArr] = useState<number[]>([]);
@@ -68,14 +76,17 @@ const MainPage = () => {
     "30m",
     "15m",
   ];
-  const [isMarketInterval, setIsMarketInterval] = useState<string>("12h");
+  const [isMarketInterval, setIsMarketInterval] = useState<string>("1d");
 
   const fetchMarketData = useCallback(
     async (symbol: string, interval: string, limit: number) => {
       try {
+        // 서버데이터와 csv데이터를 불러옵니다.
         const response = await klines(symbol, interval, limit);
         const csvRes = await readMarketData(symbol, interval);
 
+        // marketData에는 서버에서 불러온 원본 데이터 저장
+        // sorktMarket함수를 실행하여 데이터 병합
         if (response && response.data) {
           setMarketData(response.data);
           const serverData = heikinashi(response.data);
@@ -161,54 +172,31 @@ const MainPage = () => {
 
         const cs = [...spliceCsvData, ...serverData];
 
-        // console.log(
-        //   "csv timeFrame: ",
-        //   item.timeFrame,
-        //   "server timeTrame: ",
-        //   serverData[0].timeFrame,
-        //   "index: ",
-        //   index,
-        //   "spliceCsvData: ",
-        //   spliceCsvData,
-        //   "spliceServerData: ",
-        //   serverData,
-        //   "cs: ",
-        //   cs,
-        //   "interval:",
-        //   interval
-        // );
-
-        const c: movingAverageInfo[] = [];
-        c.push(
+        const emaArr: movingAverageInfo[] = [
           ema(cs, 89),
-          ema(cs, 84),
           ema(cs, 144),
-          ema(cs, 136),
           ema(cs, 233),
-          ema(cs, 220),
           ema(cs, 377),
-          ema(cs, 356),
           ema(cs, 610),
-          ema(cs, 576),
           ema(cs, 987),
-          ema(cs, 932),
           ema(cs, 1597),
-          ema(cs, 1508),
           ema(cs, 2584),
-          ema(cs, 2440),
           ema(cs, 4181),
-          ema(cs, 3948)
-        );
+        ];
 
         const rsiArr = rsi(cs, 14, 1);
-
-        const temp = emaBullDivergence(cs, c, rsiArr, interval);
+        const heikinWithDivergence = emaBullDivergence(
+          cs,
+          emaArr,
+          rsiArr,
+          interval
+        );
 
         setCondition({
           symbol: symbol,
           interval: interval,
-          heikin: temp,
-          ema: c,
+          heikin: heikinWithDivergence,
+          ema: emaArr,
           rsi: rsiArr,
         });
       }
@@ -245,13 +233,5 @@ const MainPage = () => {
     </div>
   ); // condition의 값을 어떻게 컨트롤 할 것인가 ==> 추후 수정하면서 고칠것
 };
-
-interface paramsInvestmentStrategy {
-  symbol: string;
-  interval: string;
-  heikin: heikinashiInformation[];
-  ema: movingAverageInfo[];
-  rsi: rsiInformation[];
-}
 
 export default MainPage;

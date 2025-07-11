@@ -1,7 +1,7 @@
 import { heikinashiInformation } from "../../../lib/chart/heikinashi";
 import { movingAverageInfo } from "../../../lib/indicator/movingAverage";
 import { rsiInformation } from "../../../lib/indicator/RelativeStrengthIndex";
-import React, { useRef, useEffect, useState, useLayoutEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
 import RSICanvas from "./rsi"; // RSICanvas 컴포넌트 임포트
 
@@ -21,6 +21,12 @@ const CanvasWrapper = styled.div`
   -ms-overflow-style: none; // IE, Edge
   scrollbar-width: none; //Firebox
 `;
+
+interface chartProps {
+  heikin?: heikinashiInformation[];
+  ema?: movingAverageInfo[];
+  rsi?: rsiInformation[];
+}
 
 const ChartCanvas = (chartProps?: chartProps | null) => {
   const canvasWrapperRef = useRef<HTMLDivElement>(null); // 캔버스 요소를 참조하는 요소
@@ -186,11 +192,5 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
     </CanvasWrapper>
   );
 };
-
-interface chartProps {
-  heikin?: heikinashiInformation[];
-  ema?: movingAverageInfo[];
-  rsi?: rsiInformation[];
-}
 
 export default ChartCanvas;

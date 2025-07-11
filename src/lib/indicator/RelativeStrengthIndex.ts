@@ -1,5 +1,5 @@
 import { heikinashiInformation } from "lib/chart/heikinashi";
-import React from "react";
+
 import { calculateClose } from "utils/calculate";
 
 /**

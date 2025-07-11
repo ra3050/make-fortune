@@ -1,6 +1,5 @@
 import { heikinashiInformation } from "lib/chart/heikinashi";
 import { movingAverageInfo } from "lib/indicator/movingAverage";
-import React from "react";
 
 /**
  * RSI계산에 필요한 아래와 같은 값을 반환합니다
