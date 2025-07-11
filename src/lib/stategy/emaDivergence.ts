@@ -31,8 +31,8 @@ export const emaBullDivergence = (
   let x = -1; // rsi 과매도 진입시점(index) default: -1
   let alpha = -1; // rsi 정상범위 진입시점(index) default: -1
   let beta = -1; // rsi 과매도 재진입 시점(index) default: -1
-  let a: heikinashiInformation; // alpha 일 때 가격정보
-  let b: heikinashiInformation; // beta 일 때 가격정보
+  let lowPrice: number = 0; // alpha 일 때 가격정보
+  let betaPrice: number = 0; // beta 일 때 가격정보
   const info: heikinashiInformation[] = [...heikin];
 
   // 다이버전스 계산
@@ -46,19 +46,22 @@ export const emaBullDivergence = (
       } else if (rsi[i].value < rsi[x].value) {
         x = i;
         alpha = -1;
+        // 저점기록
+        lowPrice = heikin[i].low;
       }
     }
     // 과매도 => 정상범위 전환시점
     if (x !== -1 && 30 <= rsi[i].value) {
       alpha = i;
-      a = heikin[i];
     }
     // 정상 => 과매도 진입시점
     if (x !== -1 && alpha !== -1 && rsi[i].value < 30) {
+      // 이전 rsi 저점갱신 x
       if (rsi[x].value < rsi[i].value) {
         beta = i;
-        b = heikin[i];
+        // betaPrice = heikin[i];
       } else {
+        // rsi가 이전 저점을 깼을 때
         beta = -1;
       }
     }
@@ -87,7 +90,7 @@ export const emaBullDivergence = (
       divergenceArr[i].alpha !== -1 &&
       divergenceArr[i].beta !== -1
     ) {
-      const time = calcTimeFrameToString(heikin[i].timeFrame);
+      // const time = calcTimeFrameToString(heikin[i].timeFrame);
 
       // 조건 2-1. 하이킨아시 몸통, 꼬리 계산 (현재봉)
       const bodyWidth = Math.abs(heikin[i].open - heikin[i].close);
@@ -117,30 +120,11 @@ export const emaBullDivergence = (
       }
       // 조건 2-3. 길이검사
       if (nbodyWidth < nUppmerWick && nbodyWidth < nLowerWick) {
-        info[i] = {
-          ...heikin[i],
+        info[i + 1] = {
+          ...heikin[i + 1],
           divergence: true,
         };
       }
-
-      // 조건 3.
-      // const ema89 = ema[0].ma;
-      // const ema144 = ema[1].ma;
-      // const ema233 = ema[2].ma;
-      // const ema377 = ema[3].ma;
-      // const ema610 = ema[4].ma;
-      // const ema987 = ema[5].ma;
-      // const ema1597 = ema[6].ma;
-      // const ema2584 = ema[7].ma;
-      // const ema4181 = ema[8].ma;
-
-      // if (calcIsBetween(heikin[i].high, heikin[i].low, ema89[i].value)) {
-      //   // console.log("발생시간 : ", time, rsi[x].value, rsi[beta].value);
-      //   info[i] = {
-      //     ...heikin[i],
-      //     divergence: true,
-      //   };
-      // }
     }
   }
 
