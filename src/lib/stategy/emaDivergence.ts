@@ -27,69 +27,68 @@ export const emaBullDivergence = (
   const marketLength = heikin.length;
 
   // 다이버전스 발생여부 저장
-  const divergenceArr: { x: number; alpha: number; beta: number }[] = [];
+  const divergenceArr: { x: number; y: number }[] = [];
   let x = -1; // rsi 과매도 진입시점(index) default: -1
-  let alpha = -1; // rsi 정상범위 진입시점(index) default: -1
-  let beta = -1; // rsi 과매도 재진입 시점(index) default: -1
-  let lowPrice: number = 0; // alpha 일 때 가격정보
-  let betaPrice: number = 0; // beta 일 때 가격정보
+  let y = -1; // rsi 과매도 재진입 시점(index) default: -1
+  let divergencePrice = 0; // 다이버전스의 기준이 되는 가격
+  let divergenceEnable = false; // 다이버전스 기록 가능여부
+
   const info: heikinashiInformation[] = [...heikin];
 
   // 다이버전스 계산
   for (let i = 0; i < marketLength; i++) {
     // 가장 강한 과매도가 발생한 시점
     if (rsi[i].value < 30 && rsi[i].value !== 0) {
-      // rsi 과매도 최초 진입
+      // 과매도 최초진입
       if (x === -1) {
         x = i;
+        divergencePrice = heikin[i].low;
         // 과매도 갱신
       } else if (rsi[i].value < rsi[x].value) {
         x = i;
-        alpha = -1;
-        // 저점기록
-        lowPrice = heikin[i].low;
-      }
-    }
-    // 과매도 => 정상범위 전환시점
-    if (x !== -1 && 30 <= rsi[i].value) {
-      alpha = i;
-    }
-    // 정상 => 과매도 진입시점
-    if (x !== -1 && alpha !== -1 && rsi[i].value < 30) {
-      // 이전 rsi 저점갱신 x
-      if (rsi[x].value < rsi[i].value) {
-        beta = i;
-        // betaPrice = heikin[i];
-      } else {
-        // rsi가 이전 저점을 깼을 때
-        beta = -1;
+        y = -1;
+        divergenceEnable = false;
       }
     }
 
-    // RSI 과매도 상태가 아닐경우 다이버전스 판단 x
-    if (30 <= rsi[i].value) {
-      beta = -1;
+    // 과매도 => 정상범위 전환시점
+    if (x !== -1 && 30 <= rsi[i].value) {
+      divergenceEnable = true;
+    }
+
+    // 정상 => 과매도 진입시점 :: 다비어전스 발생시점
+    if (x !== -1 && rsi[i].value < 30 && divergenceEnable) {
+      if (heikin[i].low < heikin[x].low) {
+        // x = i;
+        y = i;
+      } else {
+        y = -1;
+      }
+    } else {
+      y = -1;
     }
 
     // RSI 과매수 진입시 초기화
     if (70 <= rsi[i].value) {
       x = -1;
-      alpha = -1;
-      beta = -1;
+      y = -1;
+      divergenceEnable = false;
     }
 
-    // 다이버전스 여부 저장
-    divergenceArr.push({ x, alpha, beta });
+    divergenceArr.push({ x, y });
+
+    // if (x !== -1 && y !== -1 && divergenceEnable) {
+    //   info[i + 1] = {
+    //     ...heikin[i + 1],
+    //     divergence: true,
+    //   };
+    // }
   }
 
   // 전략 대입
   for (let i = 0; i < marketLength; i++) {
     // 조건 1. 다이버전스 검사
-    if (
-      divergenceArr[i].x !== -1 &&
-      divergenceArr[i].alpha !== -1 &&
-      divergenceArr[i].beta !== -1
-    ) {
+    if (divergenceArr[i].x !== -1 && divergenceArr[i].y !== -1) {
       // const time = calcTimeFrameToString(heikin[i].timeFrame);
 
       // 조건 2-1. 하이킨아시 몸통, 꼬리 계산 (현재봉)
