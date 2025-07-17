@@ -43,6 +43,7 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
 
+  // canvas Rect 설정
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -62,34 +63,13 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
     setCtx(context);
   }, [chartProps?.ema]);
 
-  // 캔버스 스크롤 위치 이벤트
+  // chart draw
   useEffect(() => {
-    const handleScrollCanvas = () => {
-      if (canvasWrapperRef.current) {
-        setScrollX(canvasWrapperRef.current.scrollLeft);
-      }
-    };
-
-    const canvas = canvasWrapperRef.current;
-    if (canvas) {
-      canvas.addEventListener("scroll", handleScrollCanvas);
-      document.addEventListener("mouseup", handleMouseUp);
-      document.addEventListener("mouseleave", handleMouseUp);
-    }
-
-    return () => {
-      if (canvas) {
-        canvas.removeEventListener("scroll", handleScrollCanvas);
-        document.removeEventListener("mouseup", handleMouseUp);
-        document.removeEventListener("mouseleave", handleMouseUp);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
+    // 차트를 그리는데 필요한 데이터가 없는경우
     if (!chartProps?.ema || !chartProps?.heikin || !ctx) return;
 
     const canvas = canvasRef.current;
+    // canvas not found
     if (!canvas) return;
 
     // 컨텍스트 초기화
@@ -158,6 +138,30 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
     ctx.strokeStyle = "white";
   }, [scrollX, chartProps?.ema, chartProps?.heikin]);
 
+  // 캔버스 스크롤 위치 이벤트
+  // useEffect(() => {
+  //   const handleScrollCanvas = () => {
+  //     if (canvasWrapperRef.current) {
+  //       setScrollX(canvasWrapperRef.current.scrollLeft);
+  //     }
+  //   };
+
+  //   const canvas = canvasWrapperRef.current;
+  //   if (canvas) {
+  //     // canvas.addEventListener("scroll", handleScrollCanvas);
+  //     // canvas.addEventListener("mouseup", handleMouseUp);
+  //     // canvas.addEventListener("mouseleave", handleMouseUp);
+  //   }
+
+  //   return () => {
+  //     if (canvas) {
+  //       canvas.removeEventListener("scroll", handleScrollCanvas);
+  //       canvas.removeEventListener("mouseup", handleMouseUp);
+  //       canvas.removeEventListener("mouseleave", handleMouseUp);
+  //     }
+  //   };
+  // }, []);
+
   // 마우스 다운 이벤트 핸들러
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!canvasWrapperRef.current) return;
@@ -184,8 +188,10 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
   return (
     <CanvasWrapper
       ref={canvasWrapperRef}
+      onMouseUp={handleMouseUp}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseUp}
     >
       <canvas ref={canvasRef} />
       <RSICanvas {...{ rsi: chartProps?.rsi, scrollX }} />
