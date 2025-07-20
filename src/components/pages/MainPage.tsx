@@ -22,12 +22,14 @@ import eth5m from "../../resource/ETHUSDT/BINANCE_ETHUSDT, 5.csv";
 import logo from "../../logo.svg";
 import "../../App.css";
 import { klines, price } from "../../lib/api/market/bianaceAPI";
-import { ema, movingAverageInfo, sma } from "../../lib/indicator/movingAverage";
+import { ema, movingAverageInfo } from "../../lib/indicator/movingAverage";
 import { heikinashi, heikinashiInformation } from "../../lib/chart/heikinashi";
 import { rsi, rsiInformation } from "../../lib/indicator/RelativeStrengthIndex";
-import { emaBullDivergence } from "../../lib/stategy/emaDivergence";
+import { shiftInTrend_Heikin } from "lib/stategy/ShiftInTrend";
+
+import { lowwerDivergence, upperDivergence } from "lib/stategy/Divergence";
 import styled from "styled-components";
-import Chart from "components/ui/chart/chart";
+import Chart from "components/ui/chart/ChartCanvas";
 
 const IntervalWrapper = styled.div`
   display: flex;
@@ -185,17 +187,16 @@ const MainPage = () => {
         ];
 
         const rsiArr = rsi(cs, 14, 1);
-        const heikinWithDivergence = emaBullDivergence(
-          cs,
-          emaArr,
-          rsiArr,
-          interval
-        );
+        // const heikinWithDivergence = lowwerDivergence(cs, rsiArr);
+        // const heikinWithDivergence = upperDivergence(cs, rsiArr);
+        const upper = upperDivergence(cs, rsiArr);
+        const lowwer = lowwerDivergence(upper, rsiArr);
+        const newHeikinashiInfo = shiftInTrend_Heikin(lowwer, rsiArr);
 
         setCondition({
           symbol: symbol,
           interval: interval,
-          heikin: heikinWithDivergence,
+          heikin: newHeikinashiInfo,
           ema: emaArr,
           rsi: rsiArr,
         });

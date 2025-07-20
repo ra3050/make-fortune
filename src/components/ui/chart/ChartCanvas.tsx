@@ -3,7 +3,7 @@ import { movingAverageInfo } from "../../../lib/indicator/movingAverage";
 import { rsiInformation } from "../../../lib/indicator/RelativeStrengthIndex";
 import React, { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
-import RSICanvas from "./rsi"; // RSICanvas 컴포넌트 임포트
+import RSICanvas from "./RsiCanvas"; // RSICanvas 컴포넌트 임포트
 
 const CanvasWrapper = styled.div`
   overflow-x: auto; // 가로 스크롤 활성화
@@ -114,20 +114,25 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
 
     // 캔들 그리기
     for (let i = scrollX; i < scrollX + window.innerWidth; i++) {
-      // 캔들
       ctx.beginPath();
       if (i >= chartProps.heikin.length) break;
 
-      // 다이버전스 여부에 따라 색상 설정
-      if (chartProps.heikin[i].divergence) {
-        ctx.strokeStyle = "#FFD700"; // 다이버전스가 있는 경우 금색
-      } else if (
-        i !== 0 &&
-        chartProps.heikin[i].open > chartProps.heikin[i].close
-      ) {
+      // 양봉, 음봉 구분
+      if (i !== 0 && chartProps.heikin[i].open > chartProps.heikin[i].close) {
         ctx.strokeStyle = "#F05350"; // 음봉
       } else {
         ctx.strokeStyle = "#26A69A"; // 양봉
+      }
+
+      // 다이버전스 여부에 따라 색상 설정
+      if (chartProps.heikin[i].upperDivergence) {
+        if (chartProps.heikin[i].shiftInTrend) {
+          ctx.strokeStyle = "#FFD700"; // 다이버전스가 있는 경우 금색
+        }
+      } else if (chartProps.heikin[i].lowwerDivergence) {
+        if (chartProps.heikin[i].shiftInTrend) {
+          ctx.strokeStyle = "#FFD700"; // 다이버전스가 있는 경우 금색
+        }
       }
 
       ctx.moveTo(i, chartProps.heikin[i].high);
@@ -200,3 +205,4 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
 };
 
 export default ChartCanvas;
+//
