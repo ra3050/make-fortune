@@ -145,30 +145,6 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
     ctx.strokeStyle = "white";
   }, [scrollX, chartProps?.ema, chartProps?.heikin]);
 
-  // 캔버스 스크롤 위치 이벤트
-  // useEffect(() => {
-  //   const handleScrollCanvas = () => {
-  //     if (canvasWrapperRef.current) {
-  //       setScrollX(canvasWrapperRef.current.scrollLeft);
-  //     }
-  //   };
-
-  //   const canvas = canvasWrapperRef.current;
-  //   if (canvas) {
-  //     // canvas.addEventListener("scroll", handleScrollCanvas);
-  //     // canvas.addEventListener("mouseup", handleMouseUp);
-  //     // canvas.addEventListener("mouseleave", handleMouseUp);
-  //   }
-
-  //   return () => {
-  //     if (canvas) {
-  //       canvas.removeEventListener("scroll", handleScrollCanvas);
-  //       canvas.removeEventListener("mouseup", handleMouseUp);
-  //       canvas.removeEventListener("mouseleave", handleMouseUp);
-  //     }
-  //   };
-  // }, []);
-
   // 마우스 다운 이벤트 핸들러
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!canvasWrapperRef.current) return;
