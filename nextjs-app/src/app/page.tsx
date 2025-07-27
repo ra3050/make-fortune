@@ -18,6 +18,7 @@ const IntervalWrapper = styled.div`
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
+  flex-wrap: wrap;
   position: absolute;
   top: 10px;
   left: 10px;

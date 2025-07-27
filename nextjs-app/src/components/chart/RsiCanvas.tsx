@@ -4,8 +4,14 @@ import React, { useRef, useEffect, useState } from "react";
 import { rsiInformation } from "../../../../src/lib/indicator/RelativeStrengthIndex";
 import useIsClient from "../../useHook/useIsClient";
 
+interface rsiCanvasProps {
+  rsi?: rsiInformation[];
+  scrollX: number;
+  canvasWidth: number;
+}
+
 const RSICanvas = (rsiCanvasProps?: rsiCanvasProps) => {
-  const { rsi = [], scrollX = 0 } = rsiCanvasProps || {};
+  const { rsi = [], scrollX = 0, canvasWidth = 0 } = rsiCanvasProps || {};
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
@@ -30,7 +36,7 @@ const RSICanvas = (rsiCanvasProps?: rsiCanvasProps) => {
 
     contextRef.current = context;
     setCtx(context);
-  }, [rsi, isClient]);
+  }, [rsi, isClient, canvasWidth]);
 
   useEffect(() => {
     if (!ctx || !rsi) return;
@@ -51,7 +57,7 @@ const RSICanvas = (rsiCanvasProps?: rsiCanvasProps) => {
     // rsi 그리기
     ctx.beginPath();
     let isFirst = true;
-    for (let i = scrollX; i < scrollX + window.innerWidth; i++) {
+    for (let i = scrollX; i < scrollX + canvasWidth; i++) {
       if (i >= rsi.length) break;
       if (isFirst) {
         ctx.moveTo(i, rsi[i].value);
@@ -65,22 +71,17 @@ const RSICanvas = (rsiCanvasProps?: rsiCanvasProps) => {
     // rsi 과매수 기준선
     ctx.beginPath();
     ctx.moveTo(scrollX, 70);
-    ctx.lineTo(scrollX + window.innerWidth, 70);
+    ctx.lineTo(scrollX + canvasWidth, 70);
     ctx.stroke();
 
     // rsi 과매도 기준선
     ctx.beginPath();
     ctx.moveTo(scrollX, 30);
-    ctx.lineTo(scrollX + window.innerWidth, 30);
+    ctx.lineTo(scrollX + canvasWidth, 30);
     ctx.stroke();
-  }, [scrollX, rsi, isClient]);
+  }, [scrollX, rsi, isClient, canvasWidth]);
 
   return <canvas ref={canvasRef} style={{ borderTop: "1px solid #1F232E" }} />;
 };
-
-interface rsiCanvasProps {
-  rsi?: rsiInformation[];
-  scrollX: number;
-}
 
 export default RSICanvas;

@@ -6,7 +6,6 @@ import { rsiInformation } from "../../../../src/lib/indicator/RelativeStrengthIn
 import React, { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
 import RSICanvas from "./RsiCanvas"; // RSICanvas 컴포넌트 임포트
-import useIsClient from "../../useHook/useIsClient";
 
 const CanvasWrapper = styled.div`
   overflow-x: auto; // 가로 스크롤 활성화
@@ -93,6 +92,10 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
 
     // 보이는 영역의 데이터만 계산
     const visibleData = heikin.slice(scrollX, scrollX + canvasWidth);
+
+    // visibleData가 비어있는 경우 처리
+    if (visibleData.length === 0) return;
+
     const maxHeikin = Math.max(...visibleData.map((item) => item.high));
     const minHeikin = Math.min(...visibleData.map((item) => item.low));
 
@@ -153,7 +156,7 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
     }
 
     ctx.strokeStyle = "white";
-  }, [scrollX, ema, heikin]);
+  }, [scrollX, ema, heikin, canvasWidth, canvasHeight]);
 
   // 마우스 이벤트 핸들러
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -230,6 +233,17 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
 
     canvasWrapperRef.current.scrollLeft = currentScrollLeft + deltaX;
     setScrollX(canvasWrapperRef.current.scrollLeft);
+
+    // 확대 축소 기능
+    const deltaY = e.deltaY;
+    if (typeof window === "undefined") return;
+
+    setCanvasWidth((prev) => {
+      const newCanvasWidth = prev + deltaY;
+      if (newCanvasWidth <= 50) return 50;
+      else if (newCanvasWidth >= window.innerWidth) return window.innerWidth;
+      else return newCanvasWidth;
+    });
   };
 
   return (
@@ -248,7 +262,7 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
       onWheel={handleWheel}
     >
       <canvas ref={canvasRef} />
-      <RSICanvas {...{ rsi, scrollX }} />
+      <RSICanvas {...{ rsi, scrollX, canvasWidth }} />
     </CanvasWrapper>
   );
 };
