@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useRef, useEffect, useState } from "react";
 import { rsiInformation } from "../../../../src/lib/indicator/RelativeStrengthIndex";
 

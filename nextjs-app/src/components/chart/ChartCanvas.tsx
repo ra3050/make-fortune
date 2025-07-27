@@ -1,3 +1,5 @@
+"use client";
+
 import { heikinashiInformation } from "../../../../src/lib/chart/heikinashi";
 import { movingAverageInfo } from "../../../../src/lib/indicator/movingAverage";
 import { rsiInformation } from "../../../../src/lib/indicator/RelativeStrengthIndex";

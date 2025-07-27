@@ -2,28 +2,9 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import styled from "styled-components";
-import btc4d from "../resource/BINANCE_BTCUSDT, 4D.csv"; // 이유야 어떻게 되었든간에 react에서는 아래 방법이 허용되지만 next에서는 안된다는 거잖아?
-import btc2d from "../resource/BINANCE_BTCUSDT, 2D.csv";
-import btc1d from "../resource/BINANCE_BTCUSDT, 1D.csv";
-import btc12h from "../resource/BINANCE_BTCUSDT, 720.csv";
-import btc6h from "../resource/BINANCE_BTCUSDT, 360.csv";
-import btc4h from "../resource/BINANCE_BTCUSDT, 240.csv";
-import btc2h from "../resource/BINANCE_BTCUSDT, 120.csv";
-import btc1h from "../resource/BINANCE_BTCUSDT, 60.csv";
-import btc30m from "../resource/BINANCE_BTCUSDT, 30.csv";
-import btc15m from "../resource/BINANCE_BTCUSDT, 15.csv";
-import eth1d from "../resource/ETHUSDT/BINANCE_ETHUSDT, 1D.csv";
-import eth12h from "../resource/ETHUSDT/BINANCE_ETHUSDT, 720.csv";
-import eth6h from "../resource/ETHUSDT/BINANCE_ETHUSDT, 360.csv";
-import eth4h from "../resource/ETHUSDT/BINANCE_ETHUSDT, 240.csv";
-import eth3h from "../resource/ETHUSDT/BINANCE_ETHUSDT, 180.csv";
-import eth2h from "../resource/ETHUSDT/BINANCE_ETHUSDT, 120.csv";
-import eth1h from "../resource/ETHUSDT/BINANCE_ETHUSDT, 60.csv";
-import eth30m from "../resource/ETHUSDT/BINANCE_ETHUSDT, 30.csv";
-import eth15m from "../resource/ETHUSDT/BINANCE_ETHUSDT, 15.csv";
-import eth5m from "../resource/ETHUSDT/BINANCE_ETHUSDT, 5.csv";
 
-import { klines, price } from "../lib/api/market/bianaceAPI";
+import { klines } from "./api/market/klines";
+import { price } from "./api/market/price";
 import { ema, movingAverageInfo } from "../lib/indicator/movingAverage";
 import { heikinashi, heikinashiInformation } from "../lib/chart/heikinashi";
 import { rsi, rsiInformation } from "../lib/indicator/RelativeStrengthIndex";
@@ -90,9 +71,10 @@ const MainPage = () => {
 
         // marketData에는 서버에서 불러온 원본 데이터 저장
         // sorktMarket함수를 실행하여 데이터 병합
-        if (response && response.data) {
-          setMarketData(response.data);
-          const serverData = heikinashi(response.data);
+        if (response) {
+          const data = await response.json();
+          setMarketData(data);
+          const serverData = heikinashi(data);
           sortMarketData(symbol, interval, csvRes, serverData);
         }
       } catch (e) {
@@ -108,32 +90,32 @@ const MainPage = () => {
     symbol: string,
     interval: string
   ): Promise<heikinashiInformation[]> => {
-    let csvData: heikinashiInformation[] = [];
+    const csvData: heikinashiInformation[] = [];
 
     try {
       let response: Response = new Response();
       if (symbol === "BTCUSDT") {
-        if (interval === "4d") response = await fetch(btc4d);
-        if (interval === "2d") response = await fetch(btc2d);
-        if (interval === "1d") response = await fetch(btc1d);
-        if (interval === "12h") response = await fetch(btc12h);
-        if (interval === "6h") response = await fetch(btc6h);
-        if (interval === "4h") response = await fetch(btc4h);
-        if (interval === "2h") response = await fetch(btc2h);
-        if (interval === "1h") response = await fetch(btc1h);
-        if (interval === "30m") response = await fetch(btc30m);
-        if (interval === "15m") response = await fetch(btc15m);
+        if (interval === "4d") response = await fetch("/BTCUSDT/4D.csv");
+        if (interval === "2d") response = await fetch("/BTCUSDT/2D.csv");
+        if (interval === "1d") response = await fetch("/BTCUSDT/1D.csv");
+        if (interval === "12h") response = await fetch("/BTCUSDT/720.csv");
+        if (interval === "6h") response = await fetch("/BTCUSDT/360.csv");
+        if (interval === "4h") response = await fetch("/BTCUSDT/240.csv");
+        if (interval === "2h") response = await fetch("/BTCUSDT/120.csv");
+        if (interval === "1h") response = await fetch("/BTCUSDT/60.csv");
+        if (interval === "30m") response = await fetch("/BTCUSDT/30.csv");
+        if (interval === "15m") response = await fetch("/BTCUSDT/15.csv");
       }
       if (symbol === "ETHUSDT") {
-        if (interval === "1d") response = await fetch(eth1d);
-        if (interval === "12h") response = await fetch(eth12h);
-        if (interval === "6h") response = await fetch(eth6h);
-        if (interval === "4h") response = await fetch(eth4h);
-        if (interval === "2h") response = await fetch(eth2h);
-        if (interval === "1h") response = await fetch(eth1h);
-        if (interval === "30m") response = await fetch(eth30m);
-        if (interval === "15m") response = await fetch(eth15m);
-        if (interval === "5m") response = await fetch(eth5m);
+        if (interval === "1d") response = await fetch("/ETHUSDT/1D.csv");
+        if (interval === "12h") response = await fetch("/ETHUSDT/720.csv");
+        if (interval === "6h") response = await fetch("/ETHUSDT/360.csv");
+        if (interval === "4h") response = await fetch("/ETHUSDT/240.csv");
+        if (interval === "2h") response = await fetch("/ETHUSDT/120.csv");
+        if (interval === "1h") response = await fetch("/ETHUSDT/60.csv");
+        if (interval === "30m") response = await fetch("/ETHUSDT/30.csv");
+        if (interval === "15m") response = await fetch("/ETHUSDT/15.csv");
+        if (interval === "5m") response = await fetch("/ETHUSDT/5.csv");
       }
 
       if (!response.ok) {
