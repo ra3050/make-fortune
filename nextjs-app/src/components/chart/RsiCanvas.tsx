@@ -2,14 +2,15 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import { rsiInformation } from "../../../../src/lib/indicator/RelativeStrengthIndex";
+import useIsClient from "../../useHook/useIsClient";
 
 const RSICanvas = (rsiCanvasProps?: rsiCanvasProps) => {
   const { rsi = [], scrollX = 0 } = rsiCanvasProps || {};
-
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
-
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
+
+  const isClient = useIsClient();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -20,6 +21,8 @@ const RSICanvas = (rsiCanvasProps?: rsiCanvasProps) => {
     const context = canvas.getContext("2d");
     if (!context) return;
 
+    if (!isClient) return;
+
     context.setTransform(1, 0, 0, 1, 0, 0);
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.strokeStyle = "#8D50AE";
@@ -27,13 +30,15 @@ const RSICanvas = (rsiCanvasProps?: rsiCanvasProps) => {
 
     contextRef.current = context;
     setCtx(context);
-  }, [rsi]);
+  }, [rsi, isClient]);
 
   useEffect(() => {
     if (!ctx || !rsi) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
+
+    if (!isClient) return;
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -68,7 +73,7 @@ const RSICanvas = (rsiCanvasProps?: rsiCanvasProps) => {
     ctx.moveTo(scrollX, 30);
     ctx.lineTo(scrollX + window.innerWidth, 30);
     ctx.stroke();
-  }, [scrollX, rsi]);
+  }, [scrollX, rsi, isClient]);
 
   return <canvas ref={canvasRef} style={{ borderTop: "1px solid #1F232E" }} />;
 };
