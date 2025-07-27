@@ -155,7 +155,7 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
     ctx.strokeStyle = "white";
   }, [scrollX, ema, heikin]);
 
-  // 마우스 다운 이벤트 핸들러
+  // 마우스 이벤트 핸들러
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!canvasWrapperRef.current) return;
     setIsDragging(true);
@@ -163,7 +163,6 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
     setScrollLeft(canvasWrapperRef.current.scrollLeft);
   };
 
-  // 마우스 이동 이벤트 핸들러
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !canvasWrapperRef.current) return;
     e.preventDefault();
@@ -173,18 +172,80 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
     setScrollX(canvasWrapperRef.current.scrollLeft);
   };
 
-  // 마우스 업 이벤트 핸들러
   const handleMouseUp = () => {
     setIsDragging(false);
+  };
+
+  // 터치 이벤트 핸들러 (모바일)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!canvasWrapperRef.current) return;
+    setIsDragging(true);
+    setStartX(e.touches[0].pageX - canvasWrapperRef.current.offsetLeft);
+    setScrollLeft(canvasWrapperRef.current.scrollLeft);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || !canvasWrapperRef.current) return;
+    e.preventDefault(); // 기본 스크롤 동작 방지
+    const x = e.touches[0].pageX - canvasWrapperRef.current.offsetLeft;
+    const walk = startX - x;
+    canvasWrapperRef.current.scrollLeft = scrollLeft + walk;
+    setScrollX(canvasWrapperRef.current.scrollLeft);
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
+  // 포인터 이벤트 핸들러 (Mac 터치패드 포함)
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (!canvasWrapperRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - canvasWrapperRef.current.offsetLeft);
+    setScrollLeft(canvasWrapperRef.current.scrollLeft);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging || !canvasWrapperRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - canvasWrapperRef.current.offsetLeft;
+    const walk = startX - x;
+    canvasWrapperRef.current.scrollLeft = scrollLeft + walk;
+    setScrollX(canvasWrapperRef.current.scrollLeft);
+  };
+
+  const handlePointerUp = () => {
+    setIsDragging(false);
+  };
+
+  // 휠 이벤트 핸들러 (Mac 터치패드 제스처)
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault(); // 기본 스크롤 방지
+
+    if (!canvasWrapperRef.current) return;
+
+    // 터치패드의 수평 스크롤 감지
+    const deltaX = e.deltaX;
+    const currentScrollLeft = canvasWrapperRef.current.scrollLeft;
+
+    canvasWrapperRef.current.scrollLeft = currentScrollLeft + deltaX;
+    setScrollX(canvasWrapperRef.current.scrollLeft);
   };
 
   return (
     <CanvasWrapper
       ref={canvasWrapperRef}
-      onMouseUp={handleMouseUp}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onWheel={handleWheel}
     >
       <canvas ref={canvasRef} />
       <RSICanvas {...{ rsi, scrollX }} />
@@ -193,4 +254,3 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
 };
 
 export default ChartCanvas;
-//
