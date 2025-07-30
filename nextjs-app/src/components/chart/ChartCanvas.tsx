@@ -238,12 +238,12 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
     const deltaY = e.deltaY;
     if (typeof window === "undefined") return;
 
-    setCanvasWidth((prev) => {
-      const newCanvasWidth = prev + deltaY;
-      if (newCanvasWidth <= 50) return 50;
-      else if (newCanvasWidth >= window.innerWidth) return window.innerWidth;
-      else return newCanvasWidth;
-    });
+    // setCanvasWidth((prev) => {
+    //   const newCanvasWidth = prev + deltaY;
+    //   if (newCanvasWidth <= 50) return 50;
+    //   else if (newCanvasWidth >= window.innerWidth) return window.innerWidth;
+    //   else return newCanvasWidth;
+    // });
   };
 
   return (
