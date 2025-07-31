@@ -4,9 +4,9 @@ export interface heikinashiInformation {
   high: number;
   low: number;
   close: number;
-  lowwerDivergence?: Boolean;
-  upperDivergence?: Boolean;
-  shiftInTrend?: Boolean;
+  lowwerDivergence?: boolean;
+  upperDivergence?: boolean;
+  shiftInTrend?: boolean;
 }
 
 export const heikinashi = (mData: Array<any>): Array<heikinashiInformation> => {

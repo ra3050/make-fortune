@@ -1,5 +1,5 @@
-import { heikinashiInformation } from "lib/chart/heikinashi";
-import { rsiInformation } from "lib/indicator/RelativeStrengthIndex";
+import { heikinashiInformation } from "../chart/heikinashi";
+import { rsiInformation } from "../indicator/RelativeStrengthIndex";
 
 export const shiftInTrend_Heikin = (
   heikin: heikinashiInformation[],

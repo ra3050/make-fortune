@@ -1,4 +1,4 @@
-import { heikinashiInformation } from "lib/chart/heikinashi";
+import { heikinashiInformation } from "../chart/heikinashi";
 
 /**
  * 단일 타임스템프에 대한 sma값을 반환합니다.

@@ -1,5 +1,5 @@
-import { heikinashiInformation } from "lib/chart/heikinashi";
-import { rsiInformation } from "lib/indicator/RelativeStrengthIndex";
+import { heikinashiInformation } from "../chart/heikinashi";
+import { rsiInformation } from "../indicator/RelativeStrengthIndex";
 
 /** 상승다이버전스 구분여부 반환 */
 export const upperDivergence = (
