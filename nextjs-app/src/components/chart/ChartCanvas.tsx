@@ -1,8 +1,8 @@
 "use client";
 
-import { heikinashiInformation } from "../../../../src/lib/chart/heikinashi";
-import { movingAverageInfo } from "../../../../src/lib/indicator/movingAverage";
-import { rsiInformation } from "../../../../src/lib/indicator/RelativeStrengthIndex";
+import { heikinashiInformation } from "../../lib/chart/heikinashi";
+import { movingAverageInfo } from "../../lib/indicator/movingAverage";
+import { rsiInformation } from "../../lib/indicator/RelativeStrengthIndex";
 import React, { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
 import RSICanvas from "./RsiCanvas"; // RSICanvas 컴포넌트 임포트
