@@ -16,6 +16,9 @@ const CanvasWrapper = styled.div`
   -moz-user-select: none;
   -ms-user-select: none; */
 
+  /* 처음 클릭 액션 제어*/
+  touch-action: pan-x;
+
   /* 스크롤바 숨기기 */
   &::-webkit-scrollbar {
     display: none; // Chrome, Safari, Opera
@@ -80,11 +83,19 @@ const ChartCanvas = (chartProps?: chartProps | null) => {
   // chart draw
   useEffect(() => {
     // 차트를 그리는데 필요한 데이터가 없는경우
-    if (!ema || !heikin || !ctx) return;
+    if (!ema || !heikin || !ctx) {
+      console.log("차트를 그리는데 필요한 데이터가 없습니다.");
+      return;
+    }
 
     const canvas = canvasRef.current;
     // canvas not found
-    if (!canvas) return;
+    if (!canvas) {
+      console.log("canvas not found");
+      return;
+    }
+
+    console.log("heikin", heikin);
 
     // 컨텍스트 초기화
     ctx.setTransform(1, 0, 0, 1, 0, 0);

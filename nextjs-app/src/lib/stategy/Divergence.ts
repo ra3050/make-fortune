@@ -62,10 +62,13 @@ export const upperDivergence = (
     }
 
     if (x !== -1 && y !== -1 && divergenceEnable) {
-      info[i + 1] = {
-        ...heikin[i + 1],
-        upperDivergence: true,
-      };
+      // 배열 범위 체크 추가
+      if (i + 1 < marketLength) {
+        info[i + 1] = {
+          ...heikin[i + 1],
+          upperDivergence: true,
+        };
+      }
     }
   }
 
@@ -137,10 +140,13 @@ export const lowwerDivergence = (
     }
 
     if (x !== -1 && y !== -1 && divergenceEnable) {
-      info[i + 1] = {
-        ...heikin[i + 1],
-        lowwerDivergence: true,
-      };
+      // 배열 범위 체크 추가
+      if (i + 1 < marketLength) {
+        info[i + 1] = {
+          ...heikin[i + 1],
+          lowwerDivergence: true,
+        };
+      }
     }
   }
 
